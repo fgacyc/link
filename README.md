@@ -87,7 +87,7 @@ _PS: If you want to use third-party libraries, please check with the team first.
   If not, go to extensions tab and search `@recommended` for all the recommended extensions.
 
 There will be 3 long evergreen branches:
-- `main` - **PRODUCTION**, protected, only PRs from `preprod` will be merged into `main`.
+- `prod` - **PRODUCTION**, protected, only PRs from `preprod` will be merged into `prod`.
 - `dev` - Branch out from here for development and merge back into `dev`.
 - `preprod` - Protected, only PRs from `dev` will be merged into `preprod`, this will be done for each pre-release. This is where we will do testing and QA.
 
