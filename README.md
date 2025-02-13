@@ -39,12 +39,12 @@ pnpm dev
 
 ```
 src/
-├── [components/](./src/components/) <- **Shared components**
-├── [graphql/](./src/components/graphql/) <- **GraphQL queries and mutations**
-├── [pages/](./src/pages/) <- **Pages**
-├── [modules/](./src/modules/) <- **Modules _(most of where our work will be)_**
-├── [providers/](./src/providers/) <- **Providers / Contexts etc.**
-├── [routes/](./src/routes/) <- **Routes**
+├── components/ <-- Shared components
+├── graphql/ <-- GraphQL queries and mutations
+├── pages/ <-- Pages
+├── modules/ <-- Modules (most of where our work will be)
+├── providers/ <-- Providers / Contexts etc.
+├── routes/ <-- Routes
 │
 ...
 ```
