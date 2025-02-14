@@ -5,7 +5,7 @@ const App = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     return (
-        <div className="h-screen flex items-center justify-center">
+        <div className="h-screen">
             <button
                 onClick={() => setIsDialogOpen(true)}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg"

@@ -7,6 +7,7 @@ import AssignGroup from "../pages/assign-group/assign-group.tsx";
 import BindAccount from "../pages/bind-account/bind-account.tsx";
 import RemoveGroup from "../pages/remove-group/remove-group.tsx";
 import PopupDemo from "../components/Popup/PopupDemo.tsx";
+import DialogDemo from "../components/Dialog/DialogDemo.tsx";
 
 export const routes = [
   {
@@ -40,13 +41,13 @@ export const routes = [
         protected: true,
     },
     {
-        path: "/popup-test",
+        path: "/popup",
         element: <PopupDemo/>,
         protected: false,
     },
     {
-        path: "/dialog-test",
-        element: <PopupDemo/>,
+        path: "/dialog",
+        element: <DialogDemo/>,
         protected: false,
     }
 ];
