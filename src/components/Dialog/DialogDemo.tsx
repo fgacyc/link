@@ -15,14 +15,16 @@ const App = () => {
 
             <Dialog
                 isOpen={isDialogOpen}
-                onClose={() => setIsDialogOpen(false)}
                 title="Unsaved Field"
                 cancelText="Cancel"
-                confirmText="Discard"
-                onCancel={() => setIsDialogOpen(false)}
+                confirmText="Confirm"
+                onCancel={() => {
+                    setIsDialogOpen(false)
+                    console.log("On Cancel")
+                }}
                 onConfirm={() => {
-                    console.log("Changes discarded");
                     setIsDialogOpen(false);
+                    console.log("On Confirm")
                 }}
             >
                 <p>You have unsaved field. Do you want to discard?</p>

@@ -15,13 +15,13 @@ const Popup: React.FC<PopupProps> = ({
                                          title,
                                          buttonText = "Okay",
                                          imageUrl,
-                                         children,
+                                         children
                                      }) => {
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-500/10">
-            <div className="bg-white rounded-2xl p-6 text-center shadow-lg w-80">
+            <div className="bg-white rounded-xl p-6 text-center shadow-lg w-80">
                 {/* 图片部分 */}
                 {imageUrl && (
                     <div className="relative w-16 h-16 mx-auto mb-4">
@@ -38,7 +38,7 @@ const Popup: React.FC<PopupProps> = ({
                 {/* 按钮 */}
                 <button
                     onClick={onClose}
-                    className="mt-4 w-full bg-black text-white py-2 rounded-lg font-semibold hover:bg-gray-800 transition"
+                    className="mt-4 w-full bg-black text-white py-2 rounded-lg font-semibold"
                 >
                     {buttonText}
                 </button>
