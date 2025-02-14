@@ -43,6 +43,11 @@ export const routes = [
         path: "/popup-test",
         element: <PopupDemo/>,
         protected: false,
+    },
+    {
+        path: "/dialog-test",
+        element: <PopupDemo/>,
+        protected: false,
     }
 ];
 
