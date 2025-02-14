@@ -6,6 +6,7 @@ import { ProtectedRoute } from "../components/ProtectedRoute";
 import AssignGroup from "../pages/assign-group/assign-group.tsx";
 import BindAccount from "../pages/bind-account/bind-account.tsx";
 import RemoveGroup from "../pages/remove-group/remove-group.tsx";
+import PopupDemo from "../components/Popup/PopupDemo.tsx";
 
 export const routes = [
   {
@@ -37,6 +38,11 @@ export const routes = [
         path: "/users/:userId/remove-group",
         element: <RemoveGroup/>,
         protected: true,
+    },
+    {
+        path: "/popup-test",
+        element: <PopupDemo/>,
+        protected: false,
     }
 ];
 
