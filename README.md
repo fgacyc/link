@@ -29,6 +29,12 @@ iwr https://get.pnpm.io/install.ps1 -useb | iex
 pnpm dev
 ```
 
+### Install Dependencies
+
+```bash
+pnpm install
+```
+
 ### Documentations
 
 - [Project Specs](https://docs.google.com/document/d/1MMZ08RJsG-2SiCgW0y-vSbHEX0P1tGy6IyCyHxQlA9Q/edit?tab=t.0#heading=h.k045dnqx8f31)
