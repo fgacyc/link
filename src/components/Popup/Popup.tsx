@@ -38,7 +38,7 @@ const Popup: React.FC<PopupProps> = ({
                 {/* 按钮 */}
                 <button
                     onClick={onClose}
-                    className="mt-4 w-full bg-black text-white py-2 rounded-lg font-semibold"
+                    className="mt-4 w-full bg-black text-white py-2 rounded-full font-semibold"
                 >
                     {buttonText}
                 </button>
