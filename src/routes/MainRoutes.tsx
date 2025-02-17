@@ -20,6 +20,12 @@ export const routes = [
     element: <Callback />,
     protected: false,
   },
+  {
+    path: "/cg",
+    element: <div>CG</div>,
+    protected: true,
+  },
+  { path: "/cg/dashboard", element: <CGDashboard />, protected: true },
 ];
 
 export const MainRoutes = () => {
