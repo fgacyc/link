@@ -26,17 +26,17 @@ export const routes = [
     protected: false,
   },
     {
-        path: "/users/:userId/assign-group",
+        path: "/assign-group",
         element: <AssignGroup/>,
         protected: true,
     },
     {
-        path: "/users/:userId/bind-account",
+        path: "/bind-account",
         element: <BindAccount/>,
         protected: true,
     },
     {
-        path: "/users/:userId/remove-group",
+        path: "/remove-group",
         element: <RemoveGroup/>,
         protected: true,
     },
