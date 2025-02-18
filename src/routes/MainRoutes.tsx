@@ -25,31 +25,37 @@ export const routes = [
     element: <Callback />,
     protected: false,
   },
-    {
-        path: "/assign-group",
-        element: <AssignGroup/>,
-        protected: true,
-    },
-    {
-        path: "/bind-account",
-        element: <BindAccount/>,
-        protected: true,
-    },
-    {
-        path: "/remove-group",
-        element: <RemoveGroup/>,
-        protected: true,
-    },
-    {
-        path: "/popup",
-        element: <PopupDemo/>,
-        protected: false,
-    },
-    {
-        path: "/dialog",
-        element: <DialogDemo/>,
-        protected: false,
-    }
+  {
+    path: "/assign-group",
+    element: <AssignGroup/>,
+    protected: true,
+  },
+  {
+    path: "/bind-account",
+    element: <BindAccount/>,
+    protected: true,
+  },
+  {
+    path: "/remove-group",
+    element: <RemoveGroup/>,
+    protected: true,
+  },
+  {
+    path: "/popup",
+    element: <PopupDemo/>,
+    protected: false,
+  },
+  {
+    path: "/dialog",
+    element: <DialogDemo/>,
+    protected: false,
+  },
+  {
+    path: "/cg",
+    element: <div>CG</div>,
+    protected: true,
+  },
+  { path: "/cg/dashboard", element: <CGDashboard />, protected: true },
 ];
 
 export const MainRoutes = () => {
