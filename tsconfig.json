@@ -29,6 +29,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.js"],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.cjs", "**/*.js", "*.tsx", "*.ts"],
   "exclude": ["node_modules", "eslint.config.mjs"]
 }
