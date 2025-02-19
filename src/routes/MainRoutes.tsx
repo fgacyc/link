@@ -8,7 +8,7 @@ import BindAccount from "../pages/bind-account/bind-account.tsx";
 import RemoveGroup from "../pages/remove-group/remove-group.tsx";
 import PopupDemo from "../components/Popup/PopupDemo.tsx";
 import DialogDemo from "../components/Dialog/DialogDemo.tsx";
-
+import InputDemo from "../components/Input/InputDemo.tsx";
 export const routes = [
   {
     path: "/",
@@ -48,6 +48,11 @@ export const routes = [
   {
     path: "/dialog",
     element: <DialogDemo/>,
+    protected: false,
+  },
+  {
+    path: "/input",
+    element: <InputDemo/>,
     protected: false,
   },
   {
