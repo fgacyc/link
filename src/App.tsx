@@ -4,9 +4,9 @@ function App() {
   const { loginWithRedirect } = useAuth0();
 
   return (
-    <main className="flex justify-center items-center h-screen bg-gray-100">
+    <main className="flex h-screen items-center justify-center bg-gray-100">
       <button
-        className="px-4 bg-blue-500 text-white py-1 rounded-md"
+        className="rounded-md bg-blue-500 px-4 py-1 text-white"
         onClick={() => loginWithRedirect()}
       >
         Login
