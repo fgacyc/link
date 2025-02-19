@@ -1,77 +1,75 @@
 import React from "react";
 
 interface DialogProps {
-    isOpen: boolean;
-    title: string;
-    children?: React.ReactNode;
-    vertical?: boolean;
-    cancelText?: string;
-    confirmText?: string;
-    onCancel?: () => void;
-    onConfirm?: () => void;
+  isOpen: boolean;
+  title: string;
+  children?: React.ReactNode;
+  vertical?: boolean;
+  cancelText?: string;
+  confirmText?: string;
+  onCancel?: () => void;
+  onConfirm?: () => void;
 }
 
 const Dialog: React.FC<DialogProps> = ({
-                                           isOpen,
-                                           title,
-                                           children,
-                                           vertical = true,
-                                           cancelText = "Cancel",
-                                           confirmText = "Confirm",
-                                           onCancel,
-                                           onConfirm
-                                       }) => {
-    if (!isOpen) return null;
+  isOpen,
+  title,
+  children,
+  vertical = true,
+  cancelText = "Cancel",
+  confirmText = "Confirm",
+  onCancel,
+  onConfirm,
+}) => {
+  if (!isOpen) return null;
 
-    return (
-        <div
-            className="fixed inset-0 flex items-center justify-center bg-gray-500/10">
-            <div
-                className="bg-white rounded-xl p-6 w-80 shadow-lg"
-                onClick={(e) => e.stopPropagation()} // 阻止冒泡，防止点击弹窗内部也触发关闭
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-500/10">
+      <div
+        className="w-80 rounded-xl bg-white p-6 shadow-lg"
+        onClick={(e) => e.stopPropagation()} // 阻止冒泡，防止点击弹窗内部也触发关闭
+      >
+        {/* 标题 */}
+        <h2 className="text-lg font-bold">{title}</h2>
+
+        {/* 内容区域 */}
+        <div className="mt-2 text-gray-600">{children}</div>
+
+        {/* 按钮区域 */}
+        {vertical ? (
+          <div className="mt-4 flex flex-col space-y-4">
+            <button
+              className="rounded-full bg-black px-4 py-2 font-semibold text-white"
+              onClick={onConfirm}
             >
-                {/* 标题 */}
-                <h2 className="text-lg font-bold">{title}</h2>
-
-                {/* 内容区域 */}
-                <div className="text-gray-600 mt-2">{children}</div>
-
-                {/* 按钮区域 */}
-                {
-                    vertical ? (
-                        <div className="flex flex-col space-y-4 mt-4">
-                            <button
-                                className="bg-black text-white px-4 py-2 rounded-full font-semibold"
-                                onClick={onConfirm}
-                            >
-                                {confirmText}
-                            </button>
-                            <button
-                                className="text-gray-700 font-semibold hover:text-gray-900"
-                                onClick={onCancel}
-                            >
-                                {cancelText}
-                            </button>
-                        </div>
-                    ) : <div className="flex justify-end space-x-4 mt-4">
-                        <button
-                            className="text-gray-700 font-semibold hover:text-gray-900"
-                            onClick={onCancel}
-                        >
-                            {cancelText}
-                        </button>
-                        <button
-                            className="bg-black text-white px-4 py-2 rounded-lg font-semibold"
-                            onClick={onConfirm}
-                        >
-                            {confirmText}
-                        </button>
-                    </div>
-                }
-
-            </div>
-        </div>
-    );
+              {confirmText}
+            </button>
+            <button
+              className="font-semibold text-gray-700 hover:text-gray-900"
+              onClick={onCancel}
+            >
+              {cancelText}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-4 flex justify-end space-x-4">
+            <button
+              className="font-semibold text-gray-700 hover:text-gray-900"
+              onClick={onCancel}
+            >
+              {cancelText}
+            </button>
+            <button
+              className="rounded-lg bg-black px-4 py-2 font-semibold text-white"
+              onClick={onConfirm}
+            >
+              {confirmText}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Dialog;

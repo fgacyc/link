@@ -6,8 +6,8 @@ const Callback = () => {
   const { isAuthenticated, isLoading } = useAuth0();
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-100">
-        <div className="flex flex-col items-center justfiy-center gap-2">
+      <div className="flex h-screen items-center justify-center bg-gray-100">
+        <div className="justfiy-center flex flex-col items-center gap-2">
           <CgSpinner className="animate-spin" color="#41FAD3" size={28} />
           <p className="text-center">Loading...</p>
         </div>
