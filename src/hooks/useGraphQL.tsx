@@ -7,7 +7,7 @@ export const useGraphQL = () => {
   const [ready, setReady] = useState(false);
   const { getAccessTokenSilently } = useAuth0();
 
-  const client = new GraphQLClient(import.meta.env.VITE_GRAPHQL_URL);
+  const client = new GraphQLClient(import.meta.env.VITE_GRAPHQL_URL as string);
 
   useEffect(() => {
     const getToken = async () => {
@@ -23,7 +23,7 @@ export const useGraphQL = () => {
     getToken();
   }, [getAccessTokenSilently]);
 
-  const query = (query: string, variables?: Record<string, any>) => {
+  const query = (query: string, variables?: Record<string, unknown>) => {
     if (!token) throw new Error("No or Invalid token");
     console.table({
       type: "query",
@@ -36,7 +36,7 @@ export const useGraphQL = () => {
     });
   };
 
-  const mutate = (query: string, variables?: Record<string, any>) => {
+  const mutate = (query: string, variables?: Record<string, unknown>) => {
     if (!token) throw new Error("No or Invalid token");
     console.table({ type: "mutate", query, variables, token });
     return client.request(query, variables, {
