@@ -2,20 +2,15 @@ import { GoChevronLeft } from "react-icons/go";
 import { useNavigate } from "react-router";
 
 interface HeaderNavProps {
-  transparentBG?: boolean;
   title: string;
   showBack?: boolean;
 }
 
-export const HeaderNav: React.FC<HeaderNavProps> = ({
-  transparentBG,
-  title,
-  showBack,
-}) => {
+export const HeaderNav: React.FC<HeaderNavProps> = ({ title, showBack }) => {
   const navigate = useNavigate();
   return (
     <div
-      className={`${transparentBG ? "bg-transparent" : "bg-white/95"} sticky top-0 z-[9999] flex w-full flex-row items-center justify-between px-4 pt-6.5`}
+      className={`sticky top-0 z-[9999] flex w-full flex-row items-center justify-between bg-[#f2f2f2] px-4 py-6.5`}
     >
       <div className="h-6 w-6">
         {showBack && (
