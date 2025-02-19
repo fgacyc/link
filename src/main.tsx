@@ -1,10 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
-import { MainRoutes } from "./routes/MainRoutes.tsx";
+import { MainRoutes } from "./routes/MainRoutes";
 
 import "./index.css";
-import { AuthProvider } from "./providers/AuthProvider.tsx";
+import { AuthProvider } from "./providers/AuthProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
