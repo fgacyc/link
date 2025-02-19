@@ -53,9 +53,9 @@ const Input: React.FC<InputProps> = ({
           ))}
         </div>
       ) : type === "tel" ? (
-        <div className="flex space-x-2">
+        <div className="flex items-center rounded-md border border-gray-300 bg-white">
           <select
-            className="w-20 rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-20 rounded-l-md bg-white py-2.5 pl-3 placeholder:text-[#92969D] focus:outline-none"
             value={selectedCountryCode ?? countryCode[0]}
             name={`${name}-countryCode`}
             onChange={onChange}
@@ -66,13 +66,14 @@ const Input: React.FC<InputProps> = ({
               </option>
             ))}
           </select>
+          <div className="px-2 text-[#92969D]">|</div>
           <input
             type="tel"
             name={name}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full rounded-r-md bg-white py-2.5 pr-3 placeholder:text-[#92969D] focus:outline-none"
           />
         </div>
       ) : (
@@ -83,7 +84,7 @@ const Input: React.FC<InputProps> = ({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2.5 placeholder:text-[#92969D] focus:outline-none"
         />
       )}
     </div>
