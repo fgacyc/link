@@ -43,7 +43,7 @@ const InputDemo: React.FC = () => {
       <div className="mb-6 flex items-center justify-center">
         <ProfileIcon
           imageUrl="/vite.svg"
-          size={80}
+          size={"large"}
           isVerified={true}
           alt="User profile"
         />

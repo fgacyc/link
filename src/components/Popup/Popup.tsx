@@ -1,4 +1,6 @@
 import React from "react";
+import ProfileIcon from "../ProfileIcon";
+import { Button } from "../Button";
 
 interface PopupProps {
   isOpen: boolean;
@@ -17,35 +19,39 @@ const Popup: React.FC<PopupProps> = ({
   imageUrl,
   children,
 }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-500/10">
-      <div className="w-80 rounded-xl bg-white p-6 text-center shadow-lg">
+    <div
+      className={`fixed inset-0 flex items-center justify-center bg-gray-500/10 transition-opacity duration-200 ease-in-out ${
+        isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+      }`}
+    >
+      <div
+        className={`flex w-80 flex-col items-center gap-5 rounded-xl bg-white p-5 text-center shadow-lg`}
+      >
         {/* 图片部分 */}
-        {imageUrl && (
-          <div className="relative mx-auto mb-4 h-16 w-16">
-            <img
-              src={imageUrl}
-              alt="Image"
-              className="h-16 w-16 rounded-full"
-            />
-          </div>
+        {imageUrl ? (
+          <ProfileIcon
+            imageUrl={imageUrl}
+            size={"small"}
+            alt="Image"
+            isVerified
+          />
+        ) : (
+          <></>
         )}
-
-        {/* 标题 */}
-        <h2 className="text-lg font-bold">{title}</h2>
-
-        {/* 描述内容（支持 HTML 传入）*/}
-        <div className="mt-2 text-gray-600">{children}</div>
-
+        <div className="flex flex-col items-center gap-1">
+          {/* 标题 */}
+          <h2 className="text-lg font-bold">{title}</h2>
+          {/* 描述内容（支持 HTML 传入）*/}
+          <div className="text-gray-600">{children}</div>
+        </div>
         {/* 按钮 */}
-        <button
+        <Button
+          extendedPaddingY
+          variant="primary"
+          label={buttonText}
           onClick={onClose}
-          className="mt-4 w-full rounded-full bg-black py-2 font-semibold text-white"
-        >
-          {buttonText}
-        </button>
+        />
       </div>
     </div>
   );
