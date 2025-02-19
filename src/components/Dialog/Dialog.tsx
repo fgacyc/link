@@ -4,6 +4,7 @@ interface DialogProps {
     isOpen: boolean;
     title: string;
     children?: React.ReactNode;
+    vertical?: boolean;
     cancelText?: string;
     confirmText?: string;
     onCancel?: () => void;
@@ -14,6 +15,7 @@ const Dialog: React.FC<DialogProps> = ({
                                            isOpen,
                                            title,
                                            children,
+                                           vertical = true,
                                            cancelText = "Cancel",
                                            confirmText = "Confirm",
                                            onCancel,
@@ -35,20 +37,38 @@ const Dialog: React.FC<DialogProps> = ({
                 <div className="text-gray-600 mt-2">{children}</div>
 
                 {/* 按钮区域 */}
-                <div className="flex justify-end space-x-4 mt-4">
-                    <button
-                        className="text-gray-700 font-semibold hover:text-gray-900"
-                        onClick={onCancel}
-                    >
-                        {cancelText}
-                    </button>
-                    <button
-                        className="bg-black text-white px-4 py-2 rounded-lg font-semibold"
-                        onClick={onConfirm}
-                    >
-                        {confirmText}
-                    </button>
-                </div>
+                {
+                    vertical ? (
+                        <div className="flex flex-col space-y-4 mt-4">
+                            <button
+                                className="bg-black text-white px-4 py-2 rounded-full font-semibold"
+                                onClick={onConfirm}
+                            >
+                                {confirmText}
+                            </button>
+                            <button
+                                className="text-gray-700 font-semibold hover:text-gray-900"
+                                onClick={onCancel}
+                            >
+                                {cancelText}
+                            </button>
+                        </div>
+                    ) : <div className="flex justify-end space-x-4 mt-4">
+                        <button
+                            className="text-gray-700 font-semibold hover:text-gray-900"
+                            onClick={onCancel}
+                        >
+                            {cancelText}
+                        </button>
+                        <button
+                            className="bg-black text-white px-4 py-2 rounded-lg font-semibold"
+                            onClick={onConfirm}
+                        >
+                            {confirmText}
+                        </button>
+                    </div>
+                }
+
             </div>
         </div>
     );
