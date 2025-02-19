@@ -1,22 +1,41 @@
 import React from "react";
+import { GoCheckCircleFill } from "react-icons/go";
 
 interface ProfileIconProps {
   imageUrl: string;
   isVerified?: boolean;
-  size?: number;
+  size?: "small" | "medium" | "large";
   alt?: string;
 }
+
+const SIZES = {
+  small: {
+    container: 52,
+    badge: 20,
+  },
+  medium: {
+    container: 68,
+    badge: 24,
+  },
+  large: {
+    container: 80,
+    badge: 28,
+  },
+} as const;
 
 const ProfileIcon: React.FC<ProfileIconProps> = ({
   imageUrl,
   isVerified = false,
-  size = 48,
+  size = "medium",
   alt = "Profile picture",
 }) => {
   return (
     <div
       className="relative"
-      style={{ width: `${size}px`, height: `${size}px` }}
+      style={{
+        width: `${SIZES[size].container}px`,
+        height: `${SIZES[size].container}px`,
+      }}
     >
       <img
         src={imageUrl}
@@ -24,16 +43,10 @@ const ProfileIcon: React.FC<ProfileIconProps> = ({
         className="h-full w-full rounded-full border border-white bg-white object-cover p-1"
       />
       {isVerified && (
-        <div
-          className="absolute right-0 bottom-0 flex items-center justify-center rounded-full border-2 border-white bg-green-500"
-          style={{
-            width: `${size * 0.3}px`,
-            height: `${size * 0.3}px`,
-            fontSize: `${size * 0.2}px`,
-          }}
-        >
-          <span className="text-white select-none">✓</span>
-        </div>
+        <GoCheckCircleFill
+          className="absolute -right-0.5 -bottom-0.5 rounded-full border border-white text-green-500"
+          size={SIZES[size].badge}
+        />
       )}
     </div>
   );
