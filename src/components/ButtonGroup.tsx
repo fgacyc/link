@@ -17,6 +17,7 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
     >
       {btns.map((btn) => (
         <Button
+          key={`${btn.label}-${btn.variant}`}
           variant={btn.variant}
           label={btn.label}
           disabled={btn.disabled}

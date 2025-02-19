@@ -15,7 +15,7 @@ const Callback = () => {
     );
   }
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/cg" />;
   }
 
   return <>Not Found</>;

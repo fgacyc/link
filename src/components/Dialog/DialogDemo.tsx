@@ -1,11 +1,16 @@
 import { useState } from "react";
 import Dialog from "./Dialog";
+import { TitleContext } from "@/providers/TitleContextProvider";
+import { useContext } from "react";
 
 const App = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { setTitle } = useContext(TitleContext);
+
+  setTitle("Dialog Demo");
 
   return (
-    <div className="h-screen">
+    <>
       <button
         onClick={() => setIsDialogOpen(true)}
         className="rounded-lg bg-blue-500 px-4 py-2 text-white"
@@ -29,7 +34,7 @@ const App = () => {
       >
         <p>You have unsaved field. Do you want to discard?</p>
       </Dialog>
-    </div>
+    </>
   );
 };
 

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Input from "../Input";
 import ProfileIcon from "../ProfileIcon";
+import { TitleContext } from "@/providers/TitleContextProvider";
+import { useContext } from "react";
 
 interface FormData {
   name: string;
@@ -22,6 +24,9 @@ const InputDemo: React.FC = () => {
     occupation: "",
     remark: "",
   });
+
+  const { setTitle } = useContext(TitleContext);
+  setTitle("Input Demo");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
