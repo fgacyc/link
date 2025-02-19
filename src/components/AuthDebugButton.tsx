@@ -15,8 +15,8 @@ export const AuthDebugButton = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout({
+  const handleLogout = async () => {
+    await logout({
       logoutParams: {
         returnTo: window.location.origin,
       },
