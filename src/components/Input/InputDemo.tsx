@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import Input from '../Input';
-import ProfileIcon from '../ProfileIcon';
+import React, { useState } from "react";
+import Input from "../Input";
+import ProfileIcon from "../ProfileIcon";
 
 interface FormData {
   name: string;
@@ -14,32 +14,34 @@ interface FormData {
 
 const InputDemo: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    phone: '',
-    phoneCountryCode: '+60',
-    gender: '',
-    dob: '',
-    occupation: '',
-    remark: '',
+    name: "",
+    phone: "",
+    phoneCountryCode: "+60",
+    gender: "",
+    dob: "",
+    occupation: "",
+    remark: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name === 'phone-countryCode' ? 'phoneCountryCode' : name]: value
+      [name === "phone-countryCode" ? "phoneCountryCode" : name]: value,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    console.log("Form submitted:", formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 space-y-4">
-      <div className="flex items-center justify-center mb-6">
-        <ProfileIcon 
+    <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4 p-6">
+      <div className="mb-6 flex items-center justify-center">
+        <ProfileIcon
           imageUrl="/vite.svg"
           size={80}
           isVerified={true}
@@ -63,7 +65,7 @@ const InputDemo: React.FC = () => {
         value={formData.phone}
         onChange={handleChange}
         placeholder="Enter your phone number"
-        countryCode={['+60', '+65', '+61']}
+        countryCode={["+60", "+65", "+61"]}
         selectedCountryCode={formData.phoneCountryCode}
       />
 
@@ -74,8 +76,8 @@ const InputDemo: React.FC = () => {
         value={formData.gender}
         onChange={handleChange}
         options={[
-          { label: 'Male', value: 'male' },
-          { label: 'Female', value: 'female' }
+          { label: "Male", value: "male" },
+          { label: "Female", value: "female" },
         ]}
       />
 
@@ -103,9 +105,9 @@ const InputDemo: React.FC = () => {
         placeholder="Only you can see this remark"
       />
 
-      <button 
+      <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        className="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
       >
         Submit
       </button>
