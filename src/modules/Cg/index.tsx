@@ -1,11 +1,55 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllPerson, fetchSinglePerson } from "../../graphql/declaration";
 import { useGraphQL } from "../../hooks/useGraphQL";
-import { HeaderNav } from "../../components/Header";
 import { Button, type ButtonProps } from "../../components/Button";
 import { ButtonGroup } from "../../components/ButtonGroup";
+import { useNavigate } from "react-router";
+import { TitleContext } from "@/providers/TitleContextProvider";
+import { useContext, useEffect } from "react";
 
-export default function CGDashboard() {
+export default function CG() {
+  const navigate = useNavigate();
+  const { setTitle } = useContext(TitleContext);
+
+  const navigationBtns: ButtonProps[] = [
+    { label: "Home", onClick: () => navigate("/"), variant: "primary" },
+    {
+      label: "Dashboard",
+      onClick: () => navigate("/cg"),
+      variant: "primary",
+    },
+    {
+      label: "Assign Group",
+      onClick: () => navigate("/cg/assign-group"),
+      variant: "primary",
+    },
+    {
+      label: "Bind Account",
+      onClick: () => navigate("/cg/bind-account"),
+      variant: "primary",
+    },
+    {
+      label: "Remove Group",
+      onClick: () => navigate("/cg/remove-group"),
+      variant: "primary",
+    },
+    {
+      label: "Popup",
+      onClick: () => navigate("/cg/popup"),
+      variant: "primary",
+    },
+    {
+      label: "Dialog",
+      onClick: () => navigate("/cg/dialog"),
+      variant: "primary",
+    },
+    {
+      label: "Input",
+      onClick: () => navigate("/cg/input"),
+      variant: "primary",
+    },
+  ];
+
   const { query, ready } = useGraphQL();
 
   const { data, refetch } = useQuery({
@@ -42,19 +86,21 @@ export default function CGDashboard() {
     },
   ];
 
+  useEffect(() => {
+    setTitle("Dashboard");
+  }, [setTitle]);
+
   return (
-    <div className="relative flex h-screen flex-col">
-      <HeaderNav showBack title="CGDashboard" />
-      <div className="flex w-full max-w-2xl flex-col gap-2 rounded-lg p-6">
-        <ButtonGroup btns={btns} />
-        {data ? (
-          <pre className="max-h-[600px] overflow-auto rounded-md bg-gray-50 p-4">
-            {JSON.stringify(data, null, 2)}
-          </pre>
-        ) : (
-          <>Loading...</>
-        )}
-      </div>
+    <div className="flex w-full max-w-2xl flex-col gap-2 rounded-lg">
+      <ButtonGroup btns={btns} />
+      {data ? (
+        <pre className="max-h-[600px] overflow-auto rounded-md bg-gray-50 p-4">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      ) : (
+        <>Loading...</>
+      )}
+      <ButtonGroup btns={navigationBtns} />
     </div>
   );
 }
