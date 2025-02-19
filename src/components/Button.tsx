@@ -1,6 +1,6 @@
 export interface ButtonProps {
   label: string;
-  onClick: () => void;
+  onClick: (() => void) | (() => Promise<void>);
   variant?: "primary" | "secondary" | "warning";
   disabled?: boolean;
 }
