@@ -5,11 +5,12 @@ interface InputProps {
   name: string;
   type?: 'text' | 'tel' | 'radio' | 'date';
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   required?: boolean;
   placeholder?: string;
   options?: { label: string; value: string }[];
   countryCode?: string[];
+  selectedCountryCode?: string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -22,6 +23,7 @@ const Input: React.FC<InputProps> = ({
   placeholder,
   options = [],
   countryCode = [],
+  selectedCountryCode,
 }) => {
   return (
     <div className="mb-4">
@@ -49,7 +51,9 @@ const Input: React.FC<InputProps> = ({
         <div className="flex space-x-2">
           <select 
             className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={countryCode[0]}
+            value={selectedCountryCode || countryCode[0]}
+            name={`${name}-countryCode`}
+            onChange={onChange}
           >
             {countryCode.map((code) => (
               <option key={code} value={code}>

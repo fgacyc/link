@@ -5,6 +5,7 @@ import ProfileIcon from '../ProfileIcon';
 interface FormData {
   name: string;
   phone: string;
+  phoneCountryCode: string;
   gender: string;
   dob: string;
   occupation: string;
@@ -15,17 +16,18 @@ const InputDemo: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     phone: '',
+    phoneCountryCode: '+60',
     gender: '',
     dob: '',
     occupation: '',
     remark: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name === 'phone-countryCode' ? 'phoneCountryCode' : name]: value
     }));
   };
 
@@ -62,6 +64,7 @@ const InputDemo: React.FC = () => {
         onChange={handleChange}
         placeholder="Enter your phone number"
         countryCode={['+60', '+65', '+61']}
+        selectedCountryCode={formData.phoneCountryCode}
       />
 
       <Input
