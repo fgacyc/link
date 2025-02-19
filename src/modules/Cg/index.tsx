@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchAllPerson, fetchSinglePerson } from "../../graphql/declaration";
 import { useGraphQL } from "../../hooks/useGraphQL";
 import { HeaderNav } from "../../components/Header";
-import { Button, ButtonProps } from "../../components/Button";
+import { Button, type ButtonProps } from "../../components/Button";
 import { ButtonGroup } from "../../components/ButtonGroup";
 
 export default function CGDashboard() {
