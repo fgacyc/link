@@ -4,7 +4,7 @@ interface ActivityIndicatorProps {
     level: "high" | "medium" | "low"; // high: 3条线, medium: 2条线, low: 1条线
 }
 
-const a: React.FC<ActivityIndicatorProps> = ({ level }) => {
+const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({ level }) => {
     const colorMap = {
         high: "bg-[#00BA93]",
         medium: "bg-[#F6B100]",
