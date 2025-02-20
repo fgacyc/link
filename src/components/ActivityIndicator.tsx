@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ActivityIndicatorProps {
-    level: "high" | "medium" | "low"; // high: 3条线, medium: 2条线, low: 1条线
+    level: "high" | "medium" | "low" | "none";
 }
 
 const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({ level }) => {
@@ -9,12 +9,14 @@ const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({ level }) => {
         high: "bg-[#00BA93]",
         medium: "bg-[#F6B100]",
         low: "bg-[#FF0000]",
+        none: "bg-[#D9D9D9]",
     };
 
     const activeLines = {
         high: 3,
         medium: 2,
         low: 1,
+        none: 0,
     };
 
     return (
@@ -22,7 +24,7 @@ const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({ level }) => {
             {[...Array(3)].map((_, index) => (
                 <div
                     key={index}
-                    className={`w-3 h-[1px] ${index < 3 - activeLines[level] ? "bg-[#D9D9D9]" : colorMap[level]} rounded`}
+                    className={`w-3 h-[1px] ${index < 3 - activeLines[level] ? "bg-[#D9D9D9]" : activeLines[level] > 0 ? colorMap[level] : "bg-[#D9D9D9]"} rounded`}
                 />
             ))}
         </div>
