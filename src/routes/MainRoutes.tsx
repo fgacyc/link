@@ -3,77 +3,35 @@ import App from "../App";
 import CGDashboard from "../modules/Cg";
 import Callback from "../modules/_callbacks";
 import { ProtectedRoute } from "../components/ProtectedRoute";
-import AssignGroup from "../pages/assign-group/assign-group.tsx";
-import BindAccount from "../pages/bind-account/bind-account.tsx";
-import RemoveGroup from "../pages/remove-group/remove-group.tsx";
-import PopupDemo from "../components/Popup/PopupDemo.tsx";
-import DialogDemo from "../components/Dialog/DialogDemo.tsx";
-
-export const routes = [
-  {
-    path: "/",
-    element: <App />,
-    protected: false,
-  },
-  {
-    path: "/dashboard",
-    element: <CGDashboard />,
-    protected: true,
-  },
-  {
-    path: "/callback",
-    element: <Callback />,
-    protected: false,
-  },
-  {
-    path: "/assign-group",
-    element: <AssignGroup/>,
-    protected: true,
-  },
-  {
-    path: "/bind-account",
-    element: <BindAccount/>,
-    protected: true,
-  },
-  {
-    path: "/remove-group",
-    element: <RemoveGroup/>,
-    protected: true,
-  },
-  {
-    path: "/popup",
-    element: <PopupDemo/>,
-    protected: false,
-  },
-  {
-    path: "/dialog",
-    element: <DialogDemo/>,
-    protected: false,
-  },
-  {
-    path: "/cg",
-    element: <div>CG</div>,
-    protected: true,
-  },
-  { path: "/cg/dashboard", element: <CGDashboard />, protected: true },
-];
+import AssignGroup from "../modules/AssignGroup";
+import BindAccount from "../modules/BindAccount";
+import RemoveGroup from "../modules/RemoveGroup";
+import PopupDemo from "../components/Popup/PopupDemo";
+import DialogDemo from "../components/Dialog/DialogDemo";
+import InputDemo from "../components/Input/InputDemo";
+import Layout from "@/components/Layout";
 
 export const MainRoutes = () => {
   return (
     <Routes>
-      {routes.map((route) => (
-        <Route
-          key={route.path}
-          path={route.path}
-          element={
-            route.protected ? (
-              <ProtectedRoute>{route.element}</ProtectedRoute>
-            ) : (
-              route.element
-            )
-          }
-        />
-      ))}
+      <Route index element={<App />} />
+      <Route path="callback" element={<Callback />} />
+      <Route
+        path="cg"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<CGDashboard />} />
+        <Route path="assign-group" element={<AssignGroup />} />
+        <Route path="bind-account" element={<BindAccount />} />
+        <Route path="remove-group" element={<RemoveGroup />} />
+        <Route path="popup" element={<PopupDemo />} />
+        <Route path="dialog" element={<DialogDemo />} />
+        <Route path="input" element={<InputDemo />} />
+      </Route>
     </Routes>
   );
 };

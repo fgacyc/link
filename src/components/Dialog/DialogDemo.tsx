@@ -1,36 +1,41 @@
 import { useState } from "react";
 import Dialog from "./Dialog";
+import { TitleContext } from "@/providers/TitleContextProvider";
+import { useContext } from "react";
 
 const App = () => {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { setTitle } = useContext(TitleContext);
 
-    return (
-        <div className="h-screen">
-            <button
-                onClick={() => setIsDialogOpen(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-            >
-                Open Dialog
-            </button>
+  setTitle("Dialog Demo");
 
-            <Dialog
-                isOpen={isDialogOpen}
-                title="Unsaved Field"
-                cancelText="Cancel"
-                confirmText="Confirm"
-                onCancel={() => {
-                    setIsDialogOpen(false)
-                    console.log("On Cancel")
-                }}
-                onConfirm={() => {
-                    setIsDialogOpen(false);
-                    console.log("On Confirm")
-                }}
-            >
-                <p>You have unsaved field. Do you want to discard?</p>
-            </Dialog>
-        </div>
-    );
+  return (
+    <>
+      <button
+        onClick={() => setIsDialogOpen(true)}
+        className="rounded-lg bg-blue-500 px-4 py-2 text-white"
+      >
+        Open Dialog
+      </button>
+
+      <Dialog
+        isOpen={isDialogOpen}
+        title="Unsaved Field"
+        cancelText="Cancel"
+        confirmText="Confirm"
+        onCancel={() => {
+          setIsDialogOpen(false);
+          console.log("On Cancel");
+        }}
+        onConfirm={() => {
+          setIsDialogOpen(false);
+          console.log("On Confirm");
+        }}
+      >
+        <p>You have unsaved field. Do you want to discard?</p>
+      </Dialog>
+    </>
+  );
 };
 
 export default App;
