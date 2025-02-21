@@ -3,6 +3,7 @@ import Input from "../Input";
 import ProfileIcon from "../ProfileIcon";
 import { TitleContext } from "@/providers/TitleContextProvider";
 import { useContext } from "react";
+import ActivityIndicator from "../ActivityIndicator";
 
 interface FormData {
   name: string;
