@@ -53,7 +53,6 @@ const InputDemo: React.FC = () => {
           isVerified={true}
           alt="User profile"
         />
-        <ActivityIndicator level="high" />
       </div>
 
       <Input
