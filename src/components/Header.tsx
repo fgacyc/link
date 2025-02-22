@@ -22,7 +22,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({ title, showBack }) => {
           />
         )}
       </div>
-      <p className="absolute left-1/2 -translate-x-1/2 text-xl font-bold">
+      <p className="absolute left-1/2 max-w-[75%] -translate-x-1/2 truncate text-xl font-bold whitespace-nowrap">
         {title}
       </p>
       <div className="h-6 w-6"></div>
