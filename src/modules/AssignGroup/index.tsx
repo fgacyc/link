@@ -1,21 +1,25 @@
 import { TitleContext } from "@/providers/TitleContextProvider";
-import React, { useContext } from "react";
+import React, {useContext, useState} from "react";
 import ProfileIcon from "@/components/ProfileIcon";
 import {useAuth0} from "@auth0/auth0-react";
 import ActivityIndicator from "@/components/ActivityIndicator";
 import Input from "@/components/Input";
 import {Button} from "@/components/Button";
+import Dialog from "@/components/Dialog/Dialog";
 
 export default function AssignGroup() {
   const { setTitle } = useContext(TitleContext);
 
     const { user, getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  setTitle("Assign Group");
+    setTitle("Assign Group");
 
   const config ={
       cg_id : "CG 12345",
       cg_name : "Kuchai | Ps Melvin Team | Kris cg",
+      leader_name :"Kris Mok",
+      group_name : "Kris CG",
   }
 
     const handleChange = (
@@ -60,8 +64,42 @@ export default function AssignGroup() {
 
         {/* fix to bottom*/}
         <div className={"fixed bottom-6 left-0 px-6 w-full"}>
-            <Button label={"Assign Now"} onClick={()=>{}}  />
+            <Button label={"Assign Now"} onClick={()=>{
+                setIsDialogOpen(true);
+            }}  />
         </div>
+
+        <Dialog
+            isOpen={isDialogOpen}
+            title="Confirmation to Assign"
+            cancelText="Cancel"
+            confirmText="Confirm to Assign"
+            onCancel={() => {
+                setIsDialogOpen(false);
+                console.log("On Cancel");
+            }}
+            onConfirm={() => {
+                setIsDialogOpen(false);
+                console.log("On Confirm");
+            }}
+            vertical={true}
+        >
+            <div className={"flex flex-col items-center "}>
+                <ProfileIcon imageUrl={user?.picture || "None" } size={"large"} />
+                <div className={"text-[#92969D] text-center"}>Are you sure want to assign this memeber to
+                    <b className={"ml-2 text-black"}>{config.cg_id}</b>?</div>
+            </div>
+            <div className={"rounded-lg bg-[#F4F4F4] p-2 mt-4 text-sm"}>
+                <div className={"flex justify-between mb-2"}>
+                    <div>Leader Name:</div>
+                    <div className={"font-bold"}>{config.leader_name}</div>
+                </div>
+                <div className={"flex justify-between"}>
+                    <div>Group Name:</div>
+                    <div className={"font-bold"}>{config.group_name}</div>
+                </div>
+            </div>
+        </Dialog>
     </div>
   );
 }
