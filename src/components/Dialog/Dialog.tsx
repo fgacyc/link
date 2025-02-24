@@ -64,20 +64,20 @@ const Dialog: React.FC<DialogProps> = ({
             ]}
           />
         ) : (
-            <div className="flex flex-col justify-end">
-              <button
-                  className="rounded-full bg-black  py-2 font-semibold text-white text-center"
-                  onClick={onConfirm}
-              >
-                {confirmText}
-              </button>
-              <button
-                  className="mt-2 font-semibold text-gray-700  py-2 hover:text-gray-900 text-center"
-                  onClick={onCancel}
-              >
-                {cancelText}
-              </button>
-            </div>
+          <div className="flex flex-col justify-end">
+            <button
+              className="rounded-full bg-black py-2 text-center font-semibold text-white"
+              onClick={onConfirm}
+            >
+              {confirmText}
+            </button>
+            <button
+              className="mt-2 py-2 text-center font-semibold text-gray-700 hover:text-gray-900"
+              onClick={onCancel}
+            >
+              {cancelText}
+            </button>
+          </div>
         )}
       </div>
     </div>

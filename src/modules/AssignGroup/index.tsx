@@ -1,123 +1,134 @@
 import { TitleContext } from "@/providers/TitleContextProvider";
-import React, {useContext, useState} from "react";
+import React, { useContext, useState } from "react";
 import ProfileIcon from "@/components/ProfileIcon";
-import {useAuth0} from "@auth0/auth0-react";
+import { useAuth0 } from "@auth0/auth0-react";
 import ActivityIndicator from "@/components/ActivityIndicator";
 import Input from "@/components/Input";
-import {Button} from "@/components/Button";
+import { Button } from "@/components/Button";
 import Dialog from "@/components/Dialog/Dialog";
 import Popup from "@/components/Popup/Popup";
 
 export default function AssignGroup() {
   const { setTitle } = useContext(TitleContext);
 
-    const { user, getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isPopupOpen, setIsPopupOpen] = useState(false);
-    setTitle("Assign Group");
+  const { user } = useAuth0();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  setTitle("Assign Group");
 
-  const config ={
-      cg_id : "CG 12345",
-      cg_name : "Kuchai | Ps Melvin Team | Kris cg",
-      leader_name :"Kris Mok",
-      group_name : "Kris CG",
-  }
+  const config = {
+    cg_id: "CG 12345",
+    cg_name: "Kuchai | Ps Melvin Team | Kris cg",
+    leader_name: "Kris Mok",
+    group_name: "Kris CG",
+  };
 
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    ) => {
-        const { name, value } = e.target;
-        console.log(name, value)
-    };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    console.log(name, value);
+  };
 
   return (
     <div>
-        <div className={"bg-white rounded-lg p-2 flex justify-between items-center"}>
-         <div className={"flex"}>
-             <ProfileIcon imageUrl={user?.picture || "None" } size={"small"} />
-             <div className={"ml-1"}>
-                    <p className={"font-bold text-sm"}>{user?.name || "None"}</p>
-                    <p className={"text-xs"}>{config.cg_id}</p>
-                    <p className={"text-xs text-[#92969D]"}>{config.cg_name}</p>
-             </div>
-         </div>
-            <ActivityIndicator level={"high"} />
+      <div
+        className={"flex items-center justify-between rounded-lg bg-white p-2"}
+      >
+        <div className={"flex"}>
+          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"small"} />
+          <div className={"ml-1"}>
+            <p className={"text-sm font-bold"}>{user?.name ?? "None"}</p>
+            <p className={"text-xs"}>{config.cg_id}</p>
+            <p className={"text-xs text-[#92969D]"}>{config.cg_name}</p>
+          </div>
         </div>
-        <div className={"my-3 text-sm text-[#92969D]"}>Please search a CG name to assign this member to other group.</div>
-        <Input
-            label="CG Name"
-            name="name"
-            value={""}
-            onChange={handleChange}
-            required
-            placeholder="Please enter CG name, etc: CYC 123"
-        />
+        <ActivityIndicator level={"high"} />
+      </div>
+      <div className={"my-3 text-sm text-[#92969D]"}>
+        Please search a CG name to assign this member to other group.
+      </div>
+      <Input
+        label="CG Name"
+        name="name"
+        value={""}
+        onChange={handleChange}
+        required
+        placeholder="Please enter CG name, etc: CYC 123"
+      />
 
-        <Input
-            label="When to assign"
-            name="name"
-            type={"date"}
-            value={""}
-            onChange={handleChange}
-            required
-            placeholder="Please select a date"
-        />
+      <Input
+        label="When to assign"
+        name="name"
+        type={"date"}
+        value={""}
+        onChange={handleChange}
+        required
+        placeholder="Please select a date"
+      />
 
-        {/* fix to bottom*/}
-        <div className={"fixed bottom-6 left-0 px-6 w-full"}>
-            <Button label={"Assign Now"} onClick={()=>{
-                setIsDialogOpen(true);
-            }}  />
+      {/* fix to bottom*/}
+      <div className={"fixed bottom-6 left-0 w-full px-6"}>
+        <Button
+          label={"Assign Now"}
+          onClick={() => {
+            setIsDialogOpen(true);
+          }}
+        />
+      </div>
+
+      <Dialog
+        isOpen={isDialogOpen}
+        title="Confirmation to Assign"
+        cancelText="Cancel"
+        confirmText="Confirm to Assign"
+        onCancel={() => {
+          setIsDialogOpen(false);
+          console.log("On Cancel");
+        }}
+        onConfirm={() => {
+          setIsDialogOpen(false);
+          setIsPopupOpen(true);
+          console.log("On Confirm");
+        }}
+        vertical={true}
+      >
+        <div className={"flex flex-col items-center"}>
+          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"large"} />
+          <div className={"text-center text-[#92969D]"}>
+            Are you sure want to assign this memeber to
+            <b className={"ml-2 text-black"}>{config.cg_id}</b>?
+          </div>
         </div>
-
-        <Dialog
-            isOpen={isDialogOpen}
-            title="Confirmation to Assign"
-            cancelText="Cancel"
-            confirmText="Confirm to Assign"
-            onCancel={() => {
-                setIsDialogOpen(false);
-                console.log("On Cancel");
-            }}
-            onConfirm={() => {
-                setIsDialogOpen(false);
-                setIsPopupOpen(true)
-                console.log("On Confirm");
-            }}
-            vertical={true}
-        >
-            <div className={"flex flex-col items-center "}>
-                <ProfileIcon imageUrl={user?.picture || "None" } size={"large"} />
-                <div className={"text-[#92969D] text-center"}>Are you sure want to assign this memeber to
-                    <b className={"ml-2 text-black"}>{config.cg_id}</b>?</div>
-            </div>
-            <div className={"rounded-lg bg-[#F4F4F4] p-2 mt-4 text-sm"}>
-                <div className={"flex justify-between mb-2"}>
-                    <div>Leader Name:</div>
-                    <div className={"font-bold"}>{config.leader_name}</div>
-                </div>
-                <div className={"flex justify-between"}>
-                    <div>Group Name:</div>
-                    <div className={"font-bold"}>{config.group_name}</div>
-                </div>
-            </div>
-        </Dialog>
-        <Popup
-            isOpen={isPopupOpen}
-            onClose={() => {
-                setIsPopupOpen(false);
-                console.log("Popup closed");
-            }}
-            title="Submitted to Assign"
-            buttonText="Okay"
-            imageUrl=""
-        >
-            <div className={"flex flex-col items-center "}>
-                <ProfileIcon imageUrl={user?.picture || "None"} size={"large"}/>
-                <div className={"text-[#92969D] text-center"}>Please wait. Now the member is still under approval from the new cell group.
-                </div>
-            </div>
-        </Popup>
+        <div className={"mt-4 rounded-lg bg-[#F4F4F4] p-2 text-sm"}>
+          <div className={"mb-2 flex justify-between"}>
+            <div>Leader Name:</div>
+            <div className={"font-bold"}>{config.leader_name}</div>
+          </div>
+          <div className={"flex justify-between"}>
+            <div>Group Name:</div>
+            <div className={"font-bold"}>{config.group_name}</div>
+          </div>
+        </div>
+      </Dialog>
+      <Popup
+        isOpen={isPopupOpen}
+        onClose={() => {
+          setIsPopupOpen(false);
+          console.log("Popup closed");
+        }}
+        title="Submitted to Assign"
+        buttonText="Okay"
+        imageUrl=""
+      >
+        <div className={"flex flex-col items-center"}>
+          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"large"} />
+          <div className={"text-center text-[#92969D]"}>
+            Please wait. Now the member is still under approval from the new
+            cell group.
+          </div>
+        </div>
+      </Popup>
     </div>
   );
 }

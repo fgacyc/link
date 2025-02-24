@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchAllPerson, fetchSinglePerson } from "../../graphql/declaration";
+import { fetchSinglePerson } from "../../graphql/declaration";
 import { useGraphQL } from "../../hooks/useGraphQL";
-import { Button, type ButtonProps } from "../../components/Button";
+import { type ButtonProps } from "../../components/Button";
 import { ButtonGroup } from "../../components/ButtonGroup";
 import { useNavigate } from "react-router";
 import { TitleContext } from "@/providers/TitleContextProvider";
