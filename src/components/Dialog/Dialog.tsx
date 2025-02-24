@@ -16,7 +16,7 @@ const Dialog: React.FC<DialogProps> = ({
   isOpen,
   title,
   children,
-  vertical = true,
+  vertical = false,
   cancelText = "Cancel",
   confirmText = "Confirm",
   onCancel,
@@ -40,7 +40,7 @@ const Dialog: React.FC<DialogProps> = ({
           <div className="text-gray-600">{children}</div>
         </div>
         {/* 按钮区域 */}
-        {vertical ? (
+        {!vertical ? (
           <ButtonGroup
             direction="row"
             rounded="small"
@@ -64,20 +64,20 @@ const Dialog: React.FC<DialogProps> = ({
             ]}
           />
         ) : (
-          <div className="flex justify-end space-x-4">
-            <button
-              className="font-semibold text-gray-700 hover:text-gray-900"
-              onClick={onCancel}
-            >
-              {cancelText}
-            </button>
-            <button
-              className="rounded-lg bg-black px-4 py-2 font-semibold text-white"
-              onClick={onConfirm}
-            >
-              {confirmText}
-            </button>
-          </div>
+            <div className="flex flex-col justify-end">
+              <button
+                  className="rounded-full bg-black  py-2 font-semibold text-white text-center"
+                  onClick={onConfirm}
+              >
+                {confirmText}
+              </button>
+              <button
+                  className="mt-2 font-semibold text-gray-700  py-2 hover:text-gray-900 text-center"
+                  onClick={onCancel}
+              >
+                {cancelText}
+              </button>
+            </div>
         )}
       </div>
     </div>
