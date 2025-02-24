@@ -6,13 +6,14 @@ import ActivityIndicator from "@/components/ActivityIndicator";
 import Input from "@/components/Input";
 import {Button} from "@/components/Button";
 import Dialog from "@/components/Dialog/Dialog";
+import Popup from "@/components/Popup/Popup";
 
 export default function AssignGroup() {
   const { setTitle } = useContext(TitleContext);
 
     const { user, getAccessTokenSilently, isAuthenticated, logout } = useAuth0();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
     setTitle("Assign Group");
 
   const config ={
@@ -80,6 +81,7 @@ export default function AssignGroup() {
             }}
             onConfirm={() => {
                 setIsDialogOpen(false);
+                setIsPopupOpen(true)
                 console.log("On Confirm");
             }}
             vertical={true}
@@ -100,6 +102,22 @@ export default function AssignGroup() {
                 </div>
             </div>
         </Dialog>
+        <Popup
+            isOpen={isPopupOpen}
+            onClose={() => {
+                setIsPopupOpen(false);
+                console.log("Popup closed");
+            }}
+            title="Submitted to Assign"
+            buttonText="Okay"
+            imageUrl=""
+        >
+            <div className={"flex flex-col items-center "}>
+                <ProfileIcon imageUrl={user?.picture || "None"} size={"large"}/>
+                <div className={"text-[#92969D] text-center"}>Please wait. Now the member is still under approval from the new cell group.
+                </div>
+            </div>
+        </Popup>
     </div>
   );
 }
