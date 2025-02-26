@@ -51,9 +51,9 @@ const Progress: React.FC = () => {
   const getStatusBadgeClasses = (status: MSJItem["status"]): string => {
     switch (status) {
       case "completed":
-        return "text-teal-500 border rounded-lg border-teal-200";
+        return "text-[#41FAD3] border rounded-lg border-[#41FAD3]";
       case "in-progress":
-        return "text-yellow-500 border rounded-lg border-yellow-200";
+        return "text-[#F6B100] border rounded-lg border-[#F6B100] bg-[#F6B100]/10";
       default:
         return "text-gray-500";
     }

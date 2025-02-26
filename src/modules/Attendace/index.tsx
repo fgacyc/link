@@ -247,7 +247,7 @@ const Attendance = () => {
                         <div
                           className={`${
                             event.status === "Attended"
-                              ? "text-emerald-500"
+                              ? "text-[#41FAD3]"
                               : "text-red-600"
                           } flex min-w-[100px] items-center justify-end gap-1`}
                         >
