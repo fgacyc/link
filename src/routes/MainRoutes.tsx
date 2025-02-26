@@ -10,7 +10,7 @@ import PopupDemo from "../components/Popup/PopupDemo";
 import DialogDemo from "../components/Dialog/DialogDemo";
 import InputDemo from "../components/Input/InputDemo";
 import Layout from "@/components/Layout";
-
+import Profile from "../modules/Profile";
 export const MainRoutes = () => {
   return (
     <Routes>
@@ -31,6 +31,7 @@ export const MainRoutes = () => {
         <Route path="popup" element={<PopupDemo />} />
         <Route path="dialog" element={<DialogDemo />} />
         <Route path="input" element={<InputDemo />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
     </Routes>
   );
