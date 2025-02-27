@@ -1,5 +1,9 @@
 import React from "react";
 
+/**
+ * MSJItem Interface - Represents a milestone journey item
+ * MSJ项目接口 - 表示里程碑旅程项目
+ */
 interface MSJItem {
   id: string;
   title: string;
@@ -11,11 +15,19 @@ interface MSJItem {
   lockMessage?: string;
 }
 
+/**
+ * CircularProgress Props - Properties for the circular progress indicator
+ * 圆形进度属性 - 圆形进度指示器的属性
+ */
 interface CircularProgressProps {
   current: number;
   total: number;
 }
 
+/**
+ * CircularProgress Component - Displays a circular progress indicator
+ * 圆形进度组件 - 显示圆形进度指示器
+ */
 const CircularProgress: React.FC<CircularProgressProps> = ({
   current,
   total,
@@ -47,6 +59,10 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   );
 };
 
+/**
+ * Progress Component - Displays user's progress through milestone journeys
+ * 进度组件 - 显示用户通过里程碑旅程的进度
+ */
 const Progress: React.FC = () => {
   const getStatusBadgeClasses = (status: MSJItem["status"]): string => {
     switch (status) {

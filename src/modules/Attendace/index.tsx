@@ -4,6 +4,10 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 
+/**
+ * AttendanceEvent Interface - Represents a single attendance record
+ * 出勤事件接口 - 表示单个出勤记录
+ */
 interface AttendanceEvent {
   date: string;
   day: string;
@@ -13,6 +17,10 @@ interface AttendanceEvent {
   time?: string;
 }
 
+/**
+ * AttendanceMonth Interface - Represents a month of attendance records
+ * 出勤月份接口 - 表示一个月的出勤记录
+ */
 interface AttendanceMonth {
   month: string;
   year: string;
@@ -178,6 +186,10 @@ const attendanceData: AttendanceMonth[] = [
   },
 ];
 
+/**
+ * Attendance Component - Displays user's attendance records by month
+ * 出勤组件 - 按月显示用户的出勤记录
+ */
 const Attendance = () => {
   const [expandedMonths, setExpandedMonths] = useState<string[]>(["Jan 2025"]);
 

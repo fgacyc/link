@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import Progress from "../Progress";
 import Attendance from "../Attendace";
 
+/**
+ * Profile Component - Displays user attendance and progress information
+ * 个人资料组件 - 显示用户出勤和进度信息
+ */
 type TabType = "progress" | "attendance";
 
 const Profile: React.FC = () => {
@@ -9,7 +13,7 @@ const Profile: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-3xl rounded-b-lg bg-white p-4">
-      {/* Tab Navigation */}
+      {/* Tab Navigation - 标签导航 */}
       <div className="mb-4 border-b border-gray-200">
         <div className="flex">
           <button
@@ -17,6 +21,8 @@ const Profile: React.FC = () => {
               activeTab === "attendance" ? "font-medium" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("attendance")}
+            aria-label="Show attendance information"
+            title="出勤信息 | Attendance Information"
           >
             Attendance
             {activeTab === "attendance" && (
@@ -28,6 +34,8 @@ const Profile: React.FC = () => {
               activeTab === "progress" ? "font-medium" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("progress")}
+            aria-label="Show progress information"
+            title="进度信息 | Progress Information"
           >
             Progress
             {activeTab === "progress" && (
@@ -37,7 +45,7 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Content - 标签内容 */}
       <div className="mt-4">
         {activeTab === "progress" ? <Progress /> : <Attendance />}
       </div>
