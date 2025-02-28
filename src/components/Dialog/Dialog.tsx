@@ -36,7 +36,7 @@ const Dialog: React.FC<DialogProps> = ({
       >
         <div className="flex flex-col gap-1">
           {/* 标题 */}
-          <h2 className={`text-2xl font-semibold text-${titleAlign}`}>{title}</h2>
+          <h2 className={`text-lg font-semibold text-${titleAlign}`}>{title}</h2>
 
           {/* 内容区域 */}
           <div className="text-gray-600">{children}</div>
