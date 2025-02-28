@@ -4,6 +4,7 @@ import { ButtonGroup } from "../ButtonGroup";
 interface DialogProps {
   isOpen: boolean;
   title: string;
+  titleAlign?: "left" | "center" | "right";
   children?: React.ReactNode;
   vertical?: boolean;
   cancelText?: string;
@@ -15,6 +16,7 @@ interface DialogProps {
 const Dialog: React.FC<DialogProps> = ({
   isOpen,
   title,
+                                         titleAlign = "left",
   children,
   vertical = true,
   cancelText = "Cancel",
