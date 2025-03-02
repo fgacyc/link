@@ -4,7 +4,7 @@ import { AuthDebugButton } from "../components/AuthDebugButton";
 
 const domain = import.meta.env.VITE_AUTH0_DOMAIN as string;
 const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string;
-const audience = import.meta.env.VITE_AUTH0_AUDIENCE as string;
+// const audience = import.meta.env.VITE_AUTH0_AUDIENCE as string;
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
