@@ -10,7 +10,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({ title, showBack }) => {
   const navigate = useNavigate();
   return (
     <div
-      className={`sticky top-0 z-[9999] flex w-full flex-row items-center justify-between bg-[#f2f2f2] px-4 py-6.5`}
+      className={`sticky top-0 z-[999] flex w-full flex-row items-center justify-between bg-[#f2f2f2] px-4 py-6.5`}
     >
       <div className="h-6 w-6">
         {showBack && (

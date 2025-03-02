@@ -34,54 +34,64 @@ export default function AssignGroup() {
   };
 
   return (
-    <div>
-      <div
-        className={"flex items-center justify-between rounded-lg bg-white p-2"}
-      >
-        <div className={"flex"}>
-          <ProfileIcon
-            imageUrl={
-              user?.picture ?? `https://placehold.co/40?text=${user?.name}`
-            }
-            size={"small"}
-          />
-          <div className={"ml-1"}>
-            <p className={"text-sm font-bold"}>{user?.name ?? "None"}</p>
-            <p className={"text-xs"}>{config.cg_id}</p>
-            <p className={"text-xs text-[#92969D]"}>{config.cg_name}</p>
+    <div className="flex h-full flex-grow flex-col justify-between">
+      <div className="relative flex h-full flex-grow flex-col">
+        <div
+          className={
+            "flex items-center justify-between rounded-lg bg-white p-2"
+          }
+        >
+          <div className={"flex items-center"}>
+            <ProfileIcon
+              imageUrl={
+                user?.picture ?? `https://placehold.co/40?text=${user?.name}`
+              }
+              size={"small"}
+            />
+            <div className={"ml-1"}>
+              <p className={"text-sm font-bold"}>{user?.name ?? "None"}</p>
+              <p className={"text-xs"}>{config.cg_id}</p>
+              <p className={"text-xs text-[#92969D]"}>{config.cg_name}</p>
+            </div>
           </div>
+          <ActivityIndicator level={"high"} />
         </div>
-        <ActivityIndicator level={"high"} />
-      </div>
-      <div className={"my-3 text-sm text-[#92969D]"}>
-        Please search a CG name to assign this member to other group.
-      </div>
-      <Input
-        label="CG Name"
-        name="name"
-        value={""}
-        onChange={handleChange}
-        required
-        placeholder="Please enter CG name, etc: CYC 123"
-      />
+        <div className={"my-3 text-sm text-[#92969D]"}>
+          Please search a CG name to assign this member to other group.
+        </div>
+        <Input
+          label="CG Name"
+          name="name"
+          value={""}
+          onChange={handleChange}
+          required
+          placeholder="Please enter CG name, etc: CYC 123"
+        />
 
-      <Input
-        label="When to assign"
-        name="name"
-        type={"date"}
-        value={""}
-        onChange={handleChange}
-        required
-        placeholder="Please select a date"
-      />
+        <Input
+          label="When to assign"
+          name="name"
+          type={"date"}
+          value={""}
+          onChange={handleChange}
+          required
+          placeholder="Please select a date"
+        />
+      </div>
 
       {/*  Assign group */}
       {/* fix to bottom*/}
-      <div className={"fixed bottom-6 left-0 w-full px-6"}>
+      <div className={"sticky bottom-0 flex w-full flex-col gap-2"}>
         <Button
           label={"Assign Now"}
           onClick={() => {
             setIsDialogOpen(true);
+          }}
+        />
+        <Button
+          label={"Cancel Assign"}
+          onClick={() => {
+            setIsCancelDialogOpen(true);
           }}
         />
       </div>
@@ -89,6 +99,7 @@ export default function AssignGroup() {
       <Dialog
         isOpen={isDialogOpen}
         title="Confirmation to Assign"
+        centerTitle
         cancelText="Cancel"
         confirmText="Confirm to Assign"
         onCancel={() => {
@@ -105,7 +116,7 @@ export default function AssignGroup() {
         <div className={"flex flex-col items-center"}>
           <ProfileIcon imageUrl={user?.picture ?? "None"} size={"large"} />
           <div className={"text-center text-[#92969D]"}>
-            Are you sure want to assign this memeber to
+            Are you sure want to assign this member to
             <b className={"ml-2 text-black"}>{config.cg_id}</b>?
           </div>
         </div>
@@ -138,16 +149,6 @@ export default function AssignGroup() {
           </div>
         </div>
       </Popup>
-
-      {/*    cancel assign group */}
-      <div className={"fixed bottom-15 left-0 w-full px-6"}>
-        <Button
-          label={"Cancel Assign"}
-          onClick={() => {
-            setIsCancelDialogOpen(true);
-          }}
-        />
-      </div>
 
       <Dialog
         isOpen={isCancelDialogOpen}
@@ -201,10 +202,8 @@ export default function AssignGroup() {
           />
           <h2 className="text-center text-lg font-bold">Cancelled to Assign</h2>
           <div className={"text-center text-[#92969D]"}>
-            You have cancelled to assign
-            <b className={"ml-2 text-black"}>Kenny L</b>
-            to
-            <b className={"ml-2 text-black"}>CYC456</b>
+            You have cancelled to assign <b className={"text-black"}>Kenny L</b>{" "}
+            to <b className={"text-black"}>CYC456</b>
           </div>
         </div>
       </Popup>

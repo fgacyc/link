@@ -10,6 +10,7 @@ interface DialogProps {
   confirmText?: string;
   onCancel?: () => void;
   onConfirm?: () => void;
+  centerTitle?: boolean;
 }
 
 const Dialog: React.FC<DialogProps> = ({
@@ -21,10 +22,11 @@ const Dialog: React.FC<DialogProps> = ({
   confirmText = "Confirm",
   onCancel,
   onConfirm,
+  centerTitle,
 }) => {
   return (
     <div
-      className={`fixed inset-0 flex items-center justify-center bg-gray-500/10 transition-opacity duration-200 ease-in-out ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-gray-500/10 transition-opacity duration-200 ease-in-out ${
         isOpen ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
     >
@@ -34,7 +36,11 @@ const Dialog: React.FC<DialogProps> = ({
       >
         <div className="flex flex-col gap-1">
           {/* 标题 */}
-          <h2 className="text-lg font-bold">{title}</h2>
+          <h2
+            className={`text-lg ${centerTitle ? "text-center" : ""} font-bold`}
+          >
+            {title}
+          </h2>
 
           {/* 内容区域 */}
           <div className="text-gray-600">{children}</div>
