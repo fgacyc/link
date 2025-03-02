@@ -37,7 +37,7 @@ const Dialog: React.FC<DialogProps> = ({
         <div className="flex flex-col gap-1">
           {/* 标题 */}
           <h2
-            className={`text-lg ${centerTitle ? "text-center" : ""} font-bold`}
+            className={`w-full text-lg ${centerTitle ? "text-center" : ""} font-bold`}
           >
             {title}
           </h2>
