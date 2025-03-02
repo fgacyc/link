@@ -36,7 +36,12 @@ export default function AssignGroup() {
         className={"flex items-center justify-between rounded-lg bg-white p-2"}
       >
         <div className={"flex"}>
-          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"small"} />
+          <ProfileIcon
+            imageUrl={
+              user?.picture ?? `https://placehold.co/40?text=${user?.name}`
+            }
+            size={"small"}
+          />
           <div className={"ml-1"}>
             <p className={"text-sm font-bold"}>{user?.name ?? "None"}</p>
             <p className={"text-xs"}>{config.cg_id}</p>
