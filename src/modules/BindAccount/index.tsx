@@ -6,11 +6,12 @@ import Dialog from "@/components/Dialog/Dialog";
 import ProfileIcon from "@/components/ProfileIcon";
 import Popup from "@/components/Popup/Popup";
 import { useAuth0 } from "@auth0/auth0-react";
+import MemberDropdown from "@/modules/BindAccount/MemberDropdown";
 
 interface Member {
   id: string;
   name: string;
-  avatar: string;
+  image: string;
 }
 
 export default function BindAccount() {
@@ -42,21 +43,29 @@ export default function BindAccount() {
     {
       id: "CGA1122345",
       name: "Kenny L",
-      avatar: "https://via.placeholder.com/40",
+      image: "https://i.pravatar.cc/300?Kenny",
     },
     {
       id: "CGA1126789",
       name: "John D",
-      avatar: "https://via.placeholder.com/40",
+      image: "https://i.pravatar.cc/300?John",
     },
     {
       id: "CGA1134567",
       name: "Peter S",
-      avatar: "https://via.placeholder.com/40",
+      image: "https://i.pravatar.cc/300?Peter",
     },
   ];
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-  const [shadowUser, setShadowUser] = useState<string | null>(null);
+  // const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  // const [shadowUser, setShadowUser] = useState<string | null>(null);
+
+  const handleSelect = (member: {
+    id: string;
+    name: string;
+    image: string;
+  }) => {
+    console.log("选中的用户:", member);
+  };
 
   return (
     <div>
@@ -80,50 +89,20 @@ export default function BindAccount() {
         Please search for a shadow user to bind to this member.
       </div>
 
-      <div>
-        <label className="text-sm font-medium">Existing Member</label>
-        <select
-          className="mt-1 w-full rounded-md border p-2"
-          onChange={(e) => {
-            const member = members.find((m) => m.id === e.target.value) ?? null;
-            setSelectedMember(member);
-          }}
-          value={selectedMember?.id ?? ""}
-        >
-          <option value="">Select a member</option>
-          {members.map((member) => (
-            <option key={member.id} value={member.id}>
-              {`${member.name} (${member.id})`}
-            </option>
-          ))}
-        </select>
-        {/*{selectedMember && (*/}
-        {/*    <div className="flex items-center mt-2">*/}
-        {/*        <img src={selectedMember.avatar} alt={selectedMember.name}*/}
-        {/*             className="w-8 h-8 rounded-full mr-2"/>*/}
-        {/*        <span>{selectedMember.name} ({selectedMember.id})</span>*/}
-        {/*    </div>*/}
-        {/*)}*/}
-      </div>
+      <div className={"rounded-lg bg-white p-2"}>
+        <div>
+          <label className="text-sm font-medium">Existing Member</label>
+          <MemberDropdown members={members} onSelect={handleSelect} />
+        </div>
 
-      <div className="mt-4 flex justify-center">
-        <IoLink className={"h-6 w-6 rotate-90"} color={"#000"} />
-      </div>
+        <div className="mt-4 flex justify-center">
+          <IoLink className={"h-6 w-6 rotate-90"} color={"#000"} />
+        </div>
 
-      <div>
-        <label className="text-sm font-medium">Shadow User</label>
-        <select
-          className="mt-1 w-full rounded-md border p-2"
-          onChange={(e) => setShadowUser(e.target.value)}
-          value={shadowUser ?? ""}
-        >
-          <option value="">Search user name or CG ID</option>
-          {members.map((member) => (
-            <option key={member.id} value={member.id}>
-              {`${member.name} (${member.id})`}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="text-sm font-medium">Shadow User</label>
+          <MemberDropdown members={members} onSelect={handleSelect} />
+        </div>
       </div>
 
       <div className={"fixed bottom-6 left-0 w-full px-6"}>
