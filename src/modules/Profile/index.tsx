@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Progress from "../Progress";
-import Attendance from "../Attendace";
+import Attendance from "../Attendance";
 
 /**
  * Profile Component - Displays user attendance and progress information

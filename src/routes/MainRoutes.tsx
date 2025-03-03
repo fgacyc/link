@@ -11,6 +11,7 @@ import DialogDemo from "../components/Dialog/DialogDemo";
 import InputDemo from "../components/Input/InputDemo";
 import Layout from "@/components/Layout";
 import Profile from "../modules/Profile";
+
 export const MainRoutes = () => {
   return (
     <Routes>
