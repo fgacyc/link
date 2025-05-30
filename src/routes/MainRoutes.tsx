@@ -8,7 +8,6 @@ import BindAccount from "../modules/BindAccount";
 import RemoveGroup from "../modules/RemoveGroup";
 import PopupDemo from "../components/Popup/PopupDemo";
 import DialogDemo from "../components/Dialog/DialogDemo";
-import InputDemo from "../components/Input/InputDemo";
 import Layout from "@/components/Layout";
 import Profile from "../modules/Profile";
 import Details from "@/modules/Cg/Details";
@@ -36,7 +35,6 @@ export const MainRoutes = () => {
         <Route path="remove-group" element={<RemoveGroup />} />
         <Route path="popup" element={<PopupDemo />} />
         <Route path="dialog" element={<DialogDemo />} />
-        <Route path="input" element={<InputDemo />} />
         <Route path="profile" element={<Profile />} />
       </Route>
     </Routes>
