@@ -1,27 +1,16 @@
-import { useAuth0 } from "@auth0/auth0-react";
+import { useUser } from "@/stores/useUser";
 import { GraphQLClient } from "graphql-request";
 import { useEffect, useState } from "react";
 
 export const useGraphQL = () => {
-  const [token, setToken] = useState("");
   const [ready, setReady] = useState(false);
-  const { getAccessTokenSilently } = useAuth0();
-
-  const client = new GraphQLClient(import.meta.env.VITE_GRAPHQL_URL as string);
+  const { token } = useUser();
 
   useEffect(() => {
-    const getToken = async () => {
-      try {
-        const token = await getAccessTokenSilently();
-        setToken(token);
-        setReady(true);
-      } catch (error) {
-        console.error("Failed to get token:", error);
-        setReady(false);
-      }
-    };
-    getToken();
-  }, [getAccessTokenSilently]);
+    setReady(!!token);
+  }, [token]);
+
+  const client = new GraphQLClient(import.meta.env.VITE_GRAPHQL_URL as string);
 
   const query = (query: string, variables?: Record<string, unknown>) => {
     if (!token) throw new Error("No or Invalid token");

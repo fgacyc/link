@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Popup from "./Popup";
 import { TitleContext } from "@/providers/TitleContextProvider";
 import { useContext } from "react";
@@ -7,7 +7,9 @@ const PopupDemo = () => {
   const [isOpen, setIsOpen] = useState(true);
   const { setTitle } = useContext(TitleContext);
 
-  setTitle("Popup Demo");
+  useEffect(() => {
+    setTitle("Popup Demo");
+  }, [setTitle]);
 
   return (
     <>

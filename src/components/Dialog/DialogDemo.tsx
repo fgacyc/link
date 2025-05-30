@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dialog from "./Dialog";
 import { TitleContext } from "@/providers/TitleContextProvider";
 import { useContext } from "react";
@@ -7,7 +7,9 @@ const App = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { setTitle } = useContext(TitleContext);
 
-  setTitle("Dialog Demo");
+  useEffect(() => {
+    setTitle("Dialog Demo");
+  }, [setTitle]);
 
   return (
     <>
