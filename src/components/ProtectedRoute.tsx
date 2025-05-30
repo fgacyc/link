@@ -1,13 +1,11 @@
-import { useAuth0 } from "@auth0/auth0-react";
-import { Navigate, useLocation } from "react-router";
+import { useUser } from "@/stores/useUser";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading } = useAuth0();
-  const location = useLocation();
+  const { user, isLoading } = useUser();
 
   if (isLoading) {
     return (
@@ -17,9 +15,9 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!isAuthenticated) {
-    // Save the attempted URL for redirecting after login
-    return <Navigate to="/" state={{ from: location }} replace />;
+  if (!user) {
+    window.open("https://back.fgacyc.com/", "_self");
+    return <></>;
   }
 
   return <>{children}</>;

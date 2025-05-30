@@ -1,7 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchSinglePerson } from "../../graphql/declaration";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  fetchSinglePerson,
+  updateSinglePerson,
+} from "../../graphql/declaration";
 import { useGraphQL } from "../../hooks/useGraphQL";
-import { type ButtonProps } from "../../components/Button";
+import { type ActionButtonProps } from "../../components/Button";
 import { ButtonGroup } from "../../components/ButtonGroup";
 import { useNavigate } from "react-router";
 import { TitleContext } from "@/providers/TitleContextProvider";
@@ -11,7 +14,7 @@ export default function CG() {
   const navigate = useNavigate();
   const { setTitle } = useContext(TitleContext);
 
-  const navigationBtns: ButtonProps[] = [
+  const navigationBtns: ActionButtonProps[] = [
     { label: "Home", onClick: () => navigate("/"), variant: "primary" },
     {
       label: "Dashboard",
@@ -50,13 +53,32 @@ export default function CG() {
     },
   ];
 
-  const { query, ready } = useGraphQL();
+  // Get the mutate function here
+  const { query, mutate, ready } = useGraphQL();
+
+  // Pass the mutate function to the useMutation hook from react-query
+  const { mutate: updatePerson, data: updatedPersonData } = useMutation({
+    mutationFn: ({ name, email }: { name: string; email: string }) => {
+      return mutate(updateSinglePerson, {
+        name,
+        email: email,
+      });
+    },
+  });
+
+  // Call the mutate function to update the person
+  const handleClick = () => {
+    updatePerson({
+      name: "FGA Technology.",
+      email: "fga.tech@gmail.com",
+    });
+  };
 
   const { data, refetch } = useQuery({
     queryKey: ["person"],
     queryFn: async () => {
       const data = await query(fetchSinglePerson, {
-        name: "fga.tech@gmail.com",
+        email: "fga.tech@gmail.com",
       });
       return data;
     },
@@ -72,8 +94,9 @@ export default function CG() {
   //   },
   // });
 
-  const btns: ButtonProps[] = [
+  const btns: ActionButtonProps[] = [
     { label: "Refetch", onClick: () => refetch(), variant: "primary" },
+    { label: "Mutation", onClick: handleClick, variant: "primary" },
     {
       label: "Secondary",
       onClick: () => console.log("secondary"),
@@ -91,7 +114,7 @@ export default function CG() {
   }, [setTitle]);
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-2 rounded-lg">
+    <div className="flex w-full max-w-2xl flex-col gap-2 rounded-lg px-6 pt-19">
       <ButtonGroup btns={btns} />
       {data ? (
         <pre className="max-h-[600px] overflow-auto rounded-md bg-gray-50 p-4">

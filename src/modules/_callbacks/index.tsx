@@ -1,9 +1,9 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { Navigate } from "react-router";
 import { CgSpinner } from "react-icons/cg";
+import { useUser } from "@/stores/useUser";
 
 const Callback = () => {
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isLoading, user } = useUser();
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-100">
@@ -14,7 +14,7 @@ const Callback = () => {
       </div>
     );
   }
-  if (isAuthenticated) {
+  if (user) {
     return <Navigate to="/cg" />;
   }
 

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Input from "../Input";
-import ProfileIcon from "../ProfileIcon";
+import { ProfileIcon } from "../ProfileIcon";
 import { TitleContext } from "@/providers/TitleContextProvider";
 import { useContext } from "react";
 // import ActivityIndicator from "../ActivityIndicator";
@@ -27,7 +27,10 @@ const InputDemo: React.FC = () => {
   });
 
   const { setTitle } = useContext(TitleContext);
-  setTitle("Input Demo");
+
+  useEffect(() => {
+    setTitle("Input Demo");
+  }, [setTitle]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,

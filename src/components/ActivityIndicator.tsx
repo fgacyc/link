@@ -1,6 +1,6 @@
 import React from "react";
 
-interface ActivityIndicatorProps {
+export interface ActivityIndicatorProps {
   level: "high" | "medium" | "low" | "none";
 }
 

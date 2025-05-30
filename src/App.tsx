@@ -1,16 +1,26 @@
-import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from "react-router";
+import { useUser } from "./stores/useUser";
+import { useEffect } from "react";
+import { CgSpinner } from "react-icons/cg";
 
 function App() {
-  const { loginWithRedirect } = useAuth0();
+  const { initUser } = useUser();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    initUser().then((authed) => {
+      if (authed) {
+        navigate("/cg");
+      }
+    });
+  }, [initUser]);
 
   return (
     <main className="flex h-screen items-center justify-center bg-gray-100">
-      <button
-        className="rounded-md bg-blue-500 px-4 py-1 text-white"
-        onClick={() => loginWithRedirect()}
-      >
-        Login
-      </button>
+      <div className="justfiy-center flex flex-col items-center gap-2">
+        <CgSpinner className="animate-spin" color="#41FAD3" size={28} />
+        <p className="text-center">Loading...</p>
+      </div>
     </main>
   );
 }
