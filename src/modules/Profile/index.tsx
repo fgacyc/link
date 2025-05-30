@@ -12,12 +12,12 @@ const Profile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("attendance");
 
   return (
-    <div className="mx-auto max-w-3xl rounded-b-lg bg-white p-4">
+    <div className="flex h-full flex-grow flex-col">
       {/* Tab Navigation - 标签导航 */}
-      <div className="mb-4 border-b border-gray-200">
-        <div className="flex">
+      <div className="mb-px bg-white">
+        <div className="flex flex-row gap-4 px-4 pt-4">
           <button
-            className={`relative px-4 py-2 ${
+            className={`relative pb-2 ${
               activeTab === "attendance" ? "font-medium" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("attendance")}
@@ -30,7 +30,7 @@ const Profile: React.FC = () => {
             )}
           </button>
           <button
-            className={`relative px-4 py-2 ${
+            className={`relative pb-2 ${
               activeTab === "progress" ? "font-medium" : "text-gray-500"
             }`}
             onClick={() => setActiveTab("progress")}
@@ -46,7 +46,7 @@ const Profile: React.FC = () => {
       </div>
 
       {/* Tab Content - 标签内容 */}
-      <div className="mt-4">
+      <div className="rounded-lg bg-white px-4 py-4">
         {activeTab === "progress" ? <Progress /> : <Attendance />}
       </div>
     </div>

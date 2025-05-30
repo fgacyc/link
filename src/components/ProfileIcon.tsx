@@ -4,11 +4,15 @@ import { GoCheckCircleFill } from "react-icons/go";
 interface ProfileIconProps {
   imageUrl: string;
   isVerified?: boolean;
-  size?: "small" | "medium" | "large";
+  size?: "mini" | "small" | "medium" | "large";
   alt?: string;
 }
 
 const SIZES = {
+  mini: {
+    container: 40,
+    badge: 16,
+  },
   small: {
     container: 52,
     badge: 20,
@@ -21,9 +25,9 @@ const SIZES = {
     container: 80,
     badge: 28,
   },
-} as const;
+};
 
-const ProfileIcon: React.FC<ProfileIconProps> = ({
+export const ProfileIcon: React.FC<ProfileIconProps> = ({
   imageUrl,
   isVerified = false,
   size = "medium",
@@ -40,7 +44,7 @@ const ProfileIcon: React.FC<ProfileIconProps> = ({
       <img
         src={imageUrl}
         alt={alt}
-        className="h-full w-full rounded-full border border-white bg-white object-cover p-1"
+        className={`h-full w-full rounded-full border border-white bg-white object-cover ${size === "mini" ? "p-px" : size === "small" ? "p-0.5" : "p-1"}`}
       />
       {isVerified && (
         <GoCheckCircleFill
@@ -51,5 +55,3 @@ const ProfileIcon: React.FC<ProfileIconProps> = ({
     </div>
   );
 };
-
-export default ProfileIcon;

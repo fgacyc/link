@@ -11,6 +11,8 @@ import DialogDemo from "../components/Dialog/DialogDemo";
 import InputDemo from "../components/Input/InputDemo";
 import Layout from "@/components/Layout";
 import Profile from "../modules/Profile";
+import Details from "@/modules/Cg/Details";
+import { AddShadowUser } from "@/modules/AddShadowUser";
 
 export const MainRoutes = () => {
   return (
@@ -25,7 +27,10 @@ export const MainRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route index element={<CGDashboard />} />
+        <Route path="add-shadow-user" element={<AddShadowUser />} />
+
+        <Route index element={<Details />} />
+        <Route path="example" element={<CGDashboard />} />
         <Route path="assign-group" element={<AssignGroup />} />
         <Route path="bind-account" element={<BindAccount />} />
         <Route path="remove-group" element={<RemoveGroup />} />

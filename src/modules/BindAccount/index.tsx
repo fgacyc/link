@@ -1,11 +1,11 @@
 import { TitleContext } from "@/providers/TitleContextProvider";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { IoInformationCircle, IoLink } from "react-icons/io5";
 import { Button } from "@/components/Button";
 import Dialog from "@/components/Dialog/Dialog";
-import ProfileIcon from "@/components/ProfileIcon";
+import { ProfileIcon } from "@/components/ProfileIcon";
 import Popup from "@/components/Popup/Popup";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useUser } from "@/stores/useUser";
 import MemberDropdown from "@/modules/BindAccount/MemberDropdown";
 
 interface Member {
@@ -18,9 +18,11 @@ export default function BindAccount() {
   const { setTitle } = useContext(TitleContext);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const { user } = useAuth0();
+  const { user } = useUser();
 
-  setTitle("Bind Account");
+  useEffect(() => {
+    setTitle("Bind Account");
+  }, [setTitle]);
 
   // const config = {
   //   cg_id: "CG 12345",
@@ -56,8 +58,6 @@ export default function BindAccount() {
       image: "https://i.pravatar.cc/300?Peter",
     },
   ];
-  // const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-  // const [shadowUser, setShadowUser] = useState<string | null>(null);
 
   const handleSelect = (member: {
     id: string;

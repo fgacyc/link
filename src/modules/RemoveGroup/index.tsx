@@ -1,15 +1,15 @@
 import { TitleContext } from "@/providers/TitleContextProvider";
-import React, { useContext, useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import ProfileIcon from "@/components/ProfileIcon";
+import React, { useContext, useState, useEffect } from "react";
+import { ProfileIcon } from "@/components/ProfileIcon";
 // import ActivityIndicator from "@/components/ActivityIndicator";
 import { Button } from "@/components/Button";
 import Popup from "@/components/Popup/Popup";
+import { useUser } from "@/stores/useUser";
 
 export default function RemoveGroup() {
   const { setTitle } = useContext(TitleContext);
-  const { user } = useAuth0();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const { user } = useUser();
 
   const config = {
     cg_id: "CG 12345",
@@ -21,7 +21,10 @@ export default function RemoveGroup() {
     email: "123456@gamil.com",
     register_date: "2021-12-12",
   };
-  setTitle("Remove Group");
+
+  useEffect(() => {
+    setTitle("Remove Group");
+  }, [setTitle]);
 
   return (
     <div>

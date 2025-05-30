@@ -26,7 +26,7 @@ const Dialog: React.FC<DialogProps> = ({
 }) => {
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-gray-500/10 transition-opacity duration-200 ease-in-out ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-gray-500/30 transition-opacity duration-200 ease-in-out ${
         isOpen ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
     >

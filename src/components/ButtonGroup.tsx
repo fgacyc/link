@@ -1,7 +1,7 @@
-import { Button, type ButtonProps } from "./Button";
+import { ActionButton, type ActionButtonProps } from "./Button";
 
 interface ButtonGroupProps {
-  btns: ButtonProps[];
+  btns: ActionButtonProps[];
   rounded?: "small" | "default";
   direction?: "row" | "col";
 }
@@ -16,7 +16,7 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
       className={`flex ${direction === "col" ? "flex-col" : "flex-row"} gap-3`}
     >
       {btns.map((btn) => (
-        <Button
+        <ActionButton
           key={`${btn.label}-${btn.variant}`}
           variant={btn.variant}
           label={btn.label}

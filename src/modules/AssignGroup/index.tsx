@@ -1,18 +1,26 @@
 import { TitleContext } from "@/providers/TitleContextProvider";
-import React, { useContext, useState } from "react";
-import ProfileIcon from "@/components/ProfileIcon";
-import { useAuth0 } from "@auth0/auth0-react";
+import React, { useContext, useState, useEffect } from "react";
+import { ProfileIcon } from "@/components/ProfileIcon";
+
 import ActivityIndicator from "@/components/ActivityIndicator";
 import Input from "@/components/Input";
-import { Button } from "@/components/Button";
+import { ActionButton } from "@/components/Button";
 import Dialog from "@/components/Dialog/Dialog";
 import Popup from "@/components/Popup/Popup";
+import { Formik } from "formik";
+import { Form, useParams } from "react-router";
+import { useUser } from "@/stores/useUser";
 
 export default function AssignGroup() {
   const { setTitle } = useContext(TitleContext);
-  setTitle("Assign Group");
 
-  const { user } = useAuth0();
+  const { cgName } = useParams();
+
+  useEffect(() => {
+    setTitle("Assign Group");
+  }, [setTitle]);
+
+  const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
@@ -26,16 +34,22 @@ export default function AssignGroup() {
     group_name: "Kris CG",
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    console.log(name, value);
+  type AssignGroupForm = {
+    cgName: string;
+    whenToAssign: string;
   };
 
   return (
-    <div className="flex h-full flex-grow flex-col justify-between">
-      <div className="relative flex h-full flex-grow flex-col">
+    <div className="flex h-full flex-grow flex-col justify-between px-6">
+      <Formik<AssignGroupForm>
+        initialValues={{
+          cgName: "",
+          whenToAssign: "",
+        }}
+        onSubmit={(values, actions) => {
+          console.log(values);
+        }}
+      >
         <div
           className={
             "flex items-center justify-between rounded-lg bg-white p-2"
@@ -59,43 +73,40 @@ export default function AssignGroup() {
         <div className={"my-3 text-sm text-[#92969D]"}>
           Please search a CG name to assign this member to other group.
         </div>
-        <Input
-          label="CG Name"
-          name="name"
-          value={""}
-          onChange={handleChange}
-          required
-          placeholder="Please enter CG name, etc: CYC 123"
-        />
+        <Form className="relative flex h-full flex-grow flex-col">
+          <Input
+            label="CG Name"
+            name="cgName"
+            required
+            placeholder="Please enter CG name, etc: CYC 123"
+          />
 
-        <Input
-          label="When to assign"
-          name="name"
-          type={"date"}
-          value={""}
-          onChange={handleChange}
-          required
-          placeholder="Please select a date"
-        />
-      </div>
+          <Input
+            label="When to assign"
+            name="date"
+            type="date"
+            required
+            placeholder="Please select a date"
+          />
+        </Form>
 
-      {/*  Assign group */}
-      {/* fix to bottom*/}
-      <div className={"sticky bottom-0 flex w-full flex-col gap-2"}>
-        <Button
-          label={"Assign Now"}
-          onClick={() => {
-            setIsDialogOpen(true);
-          }}
-        />
-        <Button
-          label={"Cancel Assign"}
-          onClick={() => {
-            setIsCancelDialogOpen(true);
-          }}
-        />
-      </div>
-
+        {/*  Assign group */}
+        {/* fix to bottom*/}
+        <div className={"sticky bottom-0 flex w-full flex-col gap-2"}>
+          <ActionButton
+            label={"Assign Now"}
+            onClick={() => {
+              setIsDialogOpen(true);
+            }}
+          />
+          <ActionButton
+            label={"Cancel Assign"}
+            onClick={() => {
+              setIsCancelDialogOpen(true);
+            }}
+          />
+        </div>
+      </Formik>
       <Dialog
         isOpen={isDialogOpen}
         title="Confirmation to Assign"
@@ -149,7 +160,6 @@ export default function AssignGroup() {
           </div>
         </div>
       </Popup>
-
       <Dialog
         isOpen={isCancelDialogOpen}
         title="Cancel to Assign Group"
@@ -184,7 +194,6 @@ export default function AssignGroup() {
           </div>
         </div>
       </Dialog>
-
       <Popup
         isOpen={isCancelPopupOpen}
         onClose={() => {
