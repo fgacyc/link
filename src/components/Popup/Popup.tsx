@@ -1,6 +1,6 @@
 import React from "react";
-import ProfileIcon from "../ProfileIcon";
-import { Button } from "../Button";
+import { ProfileIcon } from "../ProfileIcon";
+import { ActionButton } from "../Button";
 
 interface PopupProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface PopupProps {
   buttonText?: string;
   imageUrl?: string;
   children?: React.ReactNode;
+  customImage?: React.ReactNode;
 }
 
 const Popup: React.FC<PopupProps> = ({
@@ -18,16 +19,18 @@ const Popup: React.FC<PopupProps> = ({
   buttonText = "Okay",
   imageUrl,
   children,
+  customImage,
 }) => {
   return (
     <div
-      className={`fixed inset-0 flex items-center justify-center bg-gray-500/10 transition-opacity duration-200 ease-in-out ${
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-gray-500/30 transition-opacity duration-200 ease-in-out ${
         isOpen ? "opacity-100" : "pointer-events-none opacity-0"
       }`}
     >
       <div
         className={`flex w-80 flex-col items-center gap-5 rounded-xl bg-white p-5 text-center shadow-lg`}
       >
+        {customImage ?? <></>}
         {/* 图片部分 */}
         {imageUrl ? (
           <ProfileIcon
@@ -46,7 +49,7 @@ const Popup: React.FC<PopupProps> = ({
           <div className="text-gray-600">{children}</div>
         </div>
         {/* 按钮 */}
-        <Button
+        <ActionButton
           extendedPaddingY
           variant="primary"
           label={buttonText}

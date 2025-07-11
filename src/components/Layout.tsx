@@ -7,11 +7,20 @@ import {
 import { useContext } from "react";
 
 const LayoutContent = () => {
-  const { title } = useContext(TitleContext);
+  const { title, rightIcon, fixed, white, bg, hasUnsavedChanges } =
+    useContext(TitleContext);
   return (
     <div className="relative flex h-screen flex-col">
-      <HeaderNav title={title} showBack />
-      <main className="px-6 pb-6">
+      <HeaderNav
+        title={title}
+        showBack
+        rightIcon={rightIcon}
+        bg={bg}
+        white={white}
+        fixed={fixed}
+        hasUnsavedChanges={hasUnsavedChanges}
+      />
+      <main className="relative flex h-full flex-grow flex-col">
         <Outlet />
       </main>
     </div>

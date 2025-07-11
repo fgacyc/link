@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { fetchAllPerson, fetchSinglePerson } from "../../graphql/declaration";
-import { useGraphQL } from "../../hooks/useGraphQL";
-import { Button, type ButtonProps } from "../../components/Button";
+import { useSinglePerson, useUpdateSinglePerson } from "@/graphql/hooks/user";
+import { type ActionButtonProps } from "../../components/Button";
 import { ButtonGroup } from "../../components/ButtonGroup";
 import { useNavigate } from "react-router";
 import { TitleContext } from "@/providers/TitleContextProvider";
@@ -11,69 +9,59 @@ export default function CG() {
   const navigate = useNavigate();
   const { setTitle } = useContext(TitleContext);
 
-  const navigationBtns: ButtonProps[] = [
+  const navigationBtns: ActionButtonProps[] = [
     { label: "Home", onClick: () => navigate("/"), variant: "primary" },
     {
       label: "Dashboard",
-      onClick: () => navigate("/cg"),
+      onClick: () => navigate("/cg", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Assign Group",
-      onClick: () => navigate("/cg/assign-group"),
+      onClick: () => navigate("/cg/assign-group", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Bind Account",
-      onClick: () => navigate("/cg/bind-account"),
+      onClick: () => navigate("/cg/bind-account", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Remove Group",
-      onClick: () => navigate("/cg/remove-group"),
+      onClick: () => navigate("/cg/remove-group", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Popup",
-      onClick: () => navigate("/cg/popup"),
+      onClick: () => navigate("/cg/popup", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Dialog",
-      onClick: () => navigate("/cg/dialog"),
+      onClick: () => navigate("/cg/dialog", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Input",
-      onClick: () => navigate("/cg/input"),
+      onClick: () => navigate("/cg/input", { viewTransition: true }),
       variant: "primary",
     },
   ];
 
-  const { query, ready } = useGraphQL();
+  const { data, refetch } = useSinglePerson("fga.tech@gmail.com");
+  const updatePerson = useUpdateSinglePerson();
 
-  const { data, refetch } = useQuery({
-    queryKey: ["person"],
-    queryFn: async () => {
-      const data = await query(fetchSinglePerson, {
-        name: "fga.tech@gmail.com",
-      });
-      return data;
-    },
-    enabled: ready,
-  });
+  // Call the mutate function to update the person
+  const handleClick = () => {
+    updatePerson.mutate({
+      uid: "fga.tech@gmail.com",
+      name: "FGA Technology.",
+    });
+  };
 
-  // const { data, refetch } = useQuery({
-  //   queryKey: ["person"],
-  //   queryFn: async () => {
-  //     return query(fetchSinglePerson, {
-  //       name: "fga.tech@gmail.com",
-  //     });
-  //   },
-  // });
-
-  const btns: ButtonProps[] = [
+  const btns: ActionButtonProps[] = [
     { label: "Refetch", onClick: () => refetch(), variant: "primary" },
+    { label: "Mutation", onClick: handleClick, variant: "primary" },
     {
       label: "Secondary",
       onClick: () => console.log("secondary"),
@@ -91,7 +79,7 @@ export default function CG() {
   }, [setTitle]);
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-2 rounded-lg">
+    <div className="flex w-full max-w-2xl flex-col gap-2 rounded-lg px-6 pt-19">
       <ButtonGroup btns={btns} />
       {data ? (
         <pre className="max-h-[600px] overflow-auto rounded-md bg-gray-50 p-4">
