@@ -10,7 +10,7 @@ function App() {
   useEffect(() => {
     initUser().then((authed) => {
       if (authed) {
-        navigate("/cg");
+        navigate("/cg", { viewTransition: true });
       }
     });
   }, [initUser]);

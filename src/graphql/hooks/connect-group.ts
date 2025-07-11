@@ -1,0 +1,249 @@
+import {
+  useQuery,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import {
+  fetchCGDetails,
+  getUserCG,
+  getCGMembers,
+  getAuthHeaders,
+  fetchSatellite,
+  getAllPastoralRole,
+  getPastoralRole,
+  editCG,
+  getAllCGWithParams,
+  removeMemberFromCG,
+} from "../server";
+import { executeQuery } from "../queries";
+import { useUser } from "@/stores/useUser";
+import type {
+  FetchCGDetailsResponse,
+  GetUserCGResponse,
+  GetCGMembersResponse,
+  GetCGMembersHookResponse,
+  FetchSatelliteResponse,
+  GetAllPastoralRoleResponse,
+  GetPastoralRoleResponse,
+  GetAllCGResponse,
+} from "@/types/graphql";
+
+export const connectGroupQueries = {
+  default: [{ scope: "connect_group" }] as const,
+  allCGWithParams: (key: string) =>
+    queryOptions({
+      queryKey: [{ ...connectGroupQueries.default[0], type: "all_cg" }],
+      queryFn: () => getAllCGWithParams(key),
+    }),
+  cgDetails: (id: string) =>
+    queryOptions({
+      queryKey: [
+        { ...connectGroupQueries.default[0], type: "cg_details" },
+      ] as const,
+      queryFn: () => fetchCGDetails(id),
+    }),
+  satellite: (id: string) =>
+    queryOptions({
+      queryKey: [
+        { ...connectGroupQueries.default[0], type: "satellite" },
+      ] as const,
+      queryFn: () => fetchSatellite(id),
+    }),
+  userCG: (uid: string) =>
+    queryOptions({
+      queryKey: [
+        { ...connectGroupQueries.default[0], type: "user_cg", uid },
+      ] as const,
+      queryFn: (): Promise<GetUserCGResponse> => {
+        console.log("Fetching user CG for UID:", uid);
+        if (!uid) {
+          throw new Error("UID is required for fetching user CG");
+        }
+        return getUserCG(uid);
+      },
+      enabled: !!uid,
+    }),
+  pastoralRole: (id: string) =>
+    queryOptions({
+      queryKey: [
+        { ...connectGroupQueries.default[0], type: "pastoral_role", id },
+      ],
+      queryFn: () => getPastoralRole(id),
+    }),
+  allPastoralRole: () =>
+    queryOptions({
+      queryKey: [
+        { ...connectGroupQueries.default[0], type: "all_pastoral_role" },
+      ],
+      queryFn: () => getAllPastoralRole(),
+    }),
+  cgMembers: (uid: string) =>
+    queryOptions({
+      queryKey: [
+        { ...connectGroupQueries.default[0], type: "cg_members", uid },
+      ] as const,
+      queryFn: (): Promise<GetCGMembersResponse> => {
+        console.log("Fetching CG members for UID:", uid);
+        if (!uid) {
+          throw new Error("UID is required for fetching CG members");
+        }
+        return getCGMembers(uid);
+      },
+      enabled: !!uid,
+    }),
+};
+
+// Query hooks
+export const usePastoralRole = (id: string) => {
+  const { token } = useUser();
+  return useQuery<GetPastoralRoleResponse>({
+    queryKey: ["pastoralRole", id],
+    queryFn: () => getPastoralRole(id),
+    enabled: !!token && !!id,
+  });
+};
+
+export const useAllPastoralRole = () => {
+  const { token } = useUser();
+
+  return useQuery<GetAllPastoralRoleResponse>({
+    queryKey: ["allPastoralRole"],
+    queryFn: () => getAllPastoralRole(),
+    enabled: !!token,
+  });
+};
+
+export const useCGDetails = () => {
+  const { token, user } = useUser();
+
+  return useQuery<FetchCGDetailsResponse>({
+    queryKey: ["cgDetails"],
+    queryFn: () => fetchCGDetails(user?.cg ?? ""),
+    enabled: !!token && !!user?.cg,
+  });
+};
+
+export const useSatellite = (id: string) => {
+  const { token } = useUser();
+
+  return useQuery<FetchSatelliteResponse>({
+    queryKey: ["satellite", id],
+    queryFn: () => fetchSatellite(id),
+    enabled: !!token && !!id,
+  });
+};
+
+export const useUserCG = (uid: string) => {
+  const { token } = useUser();
+
+  return useQuery<GetUserCGResponse>({
+    queryKey: ["userCG", uid],
+    queryFn: () => getUserCG(uid),
+    enabled: !!token && !!uid,
+  });
+};
+
+export const useCGMembers = (uid: string) => {
+  const { token } = useUser();
+
+  return useQuery<GetCGMembersResponse>({
+    queryKey: ["cgMembers", uid],
+    queryFn: () => getCGMembers(uid),
+    enabled: !!token && !!uid,
+  });
+};
+
+// GraphQL query for getting members by group ID
+const GET_CG_MEMBERS_BY_ID = `
+  query GetCGMembers($connectGroupId: String!) {
+    user_connect_groupCollection(
+      filter: { connect_group_id: { eq: $connectGroupId } }
+    ) {
+      edges {
+        node {
+          user {
+            id
+            no
+            name
+            given_name
+            family_name
+            phone_number
+            nickname
+            avatar_url
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const useAllCGWithParams = (key: string, enabled = true) => {
+  const [debouncedKey, setDebouncedKey] = useState(key);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedKey(key);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [key]);
+
+  return useQuery<GetAllCGResponse>({
+    queryKey: ["allCGWithParams", debouncedKey],
+    queryFn: () => getAllCGWithParams(debouncedKey),
+    enabled: enabled && debouncedKey.length > 0,
+  });
+};
+
+export const useCGMembersByGroupId = (connectGroupId: string) => {
+  return useQuery({
+    queryKey: ["cgMembersByGroupId", connectGroupId],
+    queryFn: async () => {
+      try {
+        const data = await executeQuery(
+          GET_CG_MEMBERS_BY_ID,
+          { connectGroupId },
+          getAuthHeaders(),
+        );
+        const response = data as GetCGMembersHookResponse;
+        return response.user_connect_groupCollection.edges.map(
+          (edge) => edge.node.user,
+        );
+      } catch (error) {
+        console.error("Error fetching CG members by group ID:", error);
+        return [];
+      }
+    },
+    enabled: !!connectGroupId,
+  });
+};
+
+// Mutation hooks
+export const useEditCG = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      id: string;
+      name?: string;
+      image_url?: string;
+      description?: string;
+    }) => editCG(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: connectGroupQueries.default });
+    },
+  });
+};
+
+export const useRemoveMemberFromCG = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { id: string }) => removeMemberFromCG(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: connectGroupQueries.default });
+    },
+  });
+};

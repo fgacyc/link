@@ -1,3 +1,5 @@
+import { CgSpinner } from "react-icons/cg";
+
 export interface ActionButtonProps {
   label: string;
   onClick: (() => void) | (() => Promise<void>);
@@ -6,6 +8,8 @@ export interface ActionButtonProps {
   rounded?: "small" | "default";
   type?: HTMLButtonElement["type"];
   extendedPaddingY?: boolean;
+  loading?: boolean;
+  extendedClassName?: string;
 }
 
 export const ActionButton: React.FC<ActionButtonProps> = ({
@@ -16,22 +20,28 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   rounded = "default",
   extendedPaddingY = false,
   type = "button",
+  loading = false,
+  extendedClassName,
 }) => {
   return (
     <button
       type={type}
-      className={`w-full rounded-4xl ${
+      className={`w-full rounded-4xl ${extendedClassName} ${loading ? "flex flex-row items-center justify-center" : ""} ${
         rounded === "small" ? "rounded-lg" : "rounded-4xl"
       } px-2 ${extendedPaddingY ? "py-2" : "py-1"} ${disabled ? "opacity-10" : ""} ${
         variant === "primary"
           ? "bg-dark font-bold text-white"
           : variant === "secondary"
-            ? "bg-white/95 text-black"
+            ? "text-dark bg-white/95"
             : "bg-white/95 text-[#FF0000]"
       }`}
       onClick={onClick}
     >
-      {label}
+      {loading ? (
+        <CgSpinner className="animate-spin" color="#41FAD3" size={28} />
+      ) : (
+        label
+      )}
     </button>
   );
 };

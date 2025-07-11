@@ -134,7 +134,10 @@ export default function BindAccount() {
           <div>
             <div className={"text-[#92969D]"}>Existing Member:</div>
             <div className={"flex items-center"}>
-              <ProfileIcon imageUrl={user?.picture ?? "None"} size={"small"} />
+              <ProfileIcon
+                imageUrl={user?.avatar_url ?? "None"}
+                size={"small"}
+              />
               <div className={"ml-1"}>
                 <p className={"text-sm font-bold"}>
                   {existing_member.name || "None"}
@@ -175,7 +178,10 @@ export default function BindAccount() {
       >
         <div className={"flex flex-col items-center"}>
           <div className={"flex w-full items-center justify-around"}>
-            <ProfileIcon imageUrl={user?.picture ?? "None"} size={"medium"} />
+            <ProfileIcon
+              imageUrl={user?.avatar_url ?? "None"}
+              size={"medium"}
+            />
             <IoLink className={"h-6 w-6"} color={"#000"} />
             <ProfileIcon imageUrl={"/vite.svg"} size={"medium"} />
           </div>

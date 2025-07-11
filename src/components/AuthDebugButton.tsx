@@ -7,7 +7,7 @@ export const AuthDebugButton = () => {
   const { user, token } = useUser();
 
   return (
-    <div className="fixed right-2 bottom-2 z-50">
+    <div className="fixed right-2 bottom-2 z-[9999]">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-800 text-white shadow-lg transition-colors hover:bg-gray-700"

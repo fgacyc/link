@@ -1,55 +1,91 @@
-import React, { useState } from "react";
-import Progress from "../Progress";
+import React, { useContext, useEffect, useState } from "react";
 import Attendance from "../Attendance";
+import { TitleContext } from "@/providers/TitleContextProvider";
+import { ProfileHeader } from "./Header";
+import { MoreHoriz } from "@mui/icons-material";
+import { EditMemberProfileDrawer } from "@/components/Drawer/EditMemberProfile";
 
-/**
- * Profile Component - Displays user attendance and progress information
- * 个人资料组件 - 显示用户出勤和进度信息
- */
 type TabType = "progress" | "attendance";
 
+const tabs: {
+  label: string;
+  value: TabType;
+}[] = [
+  {
+    label: "Attendance",
+    value: "attendance",
+  },
+  // {
+  //   label: "Progress",
+  //   value: "progress",
+  // },
+];
+
 const Profile: React.FC = () => {
+  const { setTitle, setFixed, setRightIcon, setBg, setWhite } =
+    useContext(TitleContext);
+
+  const [editMemberProfileDrawerOpen, setEditMemberProfileDrawerOpen] =
+    useState(false);
+
+  useEffect(() => {
+    setTitle("Member Profile");
+    setFixed(true);
+    setRightIcon(null);
+    setBg("#242424");
+    setWhite(true);
+    setRightIcon(
+      <MoreHoriz
+        className="text-dark-neon-green"
+        onClick={() => setEditMemberProfileDrawerOpen(true)}
+      />,
+    );
+
+    return () => {
+      setRightIcon(null);
+    };
+  }, [
+    setRightIcon,
+    setEditMemberProfileDrawerOpen,
+    setTitle,
+    setFixed,
+    setBg,
+    setWhite,
+  ]);
+
   const [activeTab, setActiveTab] = useState<TabType>("attendance");
 
   return (
-    <div className="flex h-full flex-grow flex-col">
-      {/* Tab Navigation - 标签导航 */}
-      <div className="mb-px bg-white">
-        <div className="flex flex-row gap-4 px-4 pt-4">
-          <button
-            className={`relative pb-2 ${
-              activeTab === "attendance" ? "font-medium" : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("attendance")}
-            aria-label="Show attendance information"
-            title="出勤信息 | Attendance Information"
-          >
-            Attendance
-            {activeTab === "attendance" && (
-              <div className="absolute bottom-[-1px] left-1/2 w-6 -translate-x-1/2 border-b-2 border-black" />
-            )}
-          </button>
-          <button
-            className={`relative pb-2 ${
-              activeTab === "progress" ? "font-medium" : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("progress")}
-            aria-label="Show progress information"
-            title="进度信息 | Progress Information"
-          >
-            Progress
-            {activeTab === "progress" && (
-              <div className="absolute bottom-[-1px] left-1/2 w-6 -translate-x-1/2 border-b-2 border-black" />
-            )}
-          </button>
+    <>
+      <EditMemberProfileDrawer
+        open={editMemberProfileDrawerOpen}
+        setOpen={setEditMemberProfileDrawerOpen}
+      />
+      <ProfileHeader />
+      <div className="mb-px flex flex-col pt-5">
+        {/* Tab Navigation - 标签导航 */}
+        <div className="flex flex-row gap-4 bg-white px-4 pt-3">
+          {tabs.map((tab) => {
+            const active = tab.value === activeTab;
+            return (
+              <button
+                key={tab.value}
+                className={`relative pb-2 text-sm ${active ? "text-dark" : "text-gray"} font-bold`}
+                onClick={() => setActiveTab(tab.value)}
+              >
+                {tab.label}
+                {tab.value === activeTab && (
+                  <div className="border-dark absolute -bottom-[2px] left-1/2 w-5 -translate-x-1/2 rounded-full border-2" />
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Tab Content - 标签内容 */}
-      <div className="rounded-lg bg-white px-4 py-4">
-        {activeTab === "progress" ? <Progress /> : <Attendance />}
-      </div>
-    </div>
+      {/* {activeTab === "progress" ? <Progress /> : <Attendance />} */}
+      <Attendance />
+    </>
   );
 };
 

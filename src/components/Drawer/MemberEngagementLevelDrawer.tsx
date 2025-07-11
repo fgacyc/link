@@ -1,7 +1,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import Drawer from ".";
 import ActivityIndicator, {
-  ActivityIndicatorProps,
+  type ActivityIndicatorProps,
 } from "../ActivityIndicator";
 
 interface MemberEngagementLevelDrawerProps {

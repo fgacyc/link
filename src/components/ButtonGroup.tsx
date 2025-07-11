@@ -23,6 +23,8 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
           disabled={btn.disabled}
           onClick={btn.onClick}
           rounded={rounded}
+          extendedClassName={btn.extendedClassName}
+          extendedPaddingY={btn.extendedPaddingY}
         />
       ))}
     </div>
