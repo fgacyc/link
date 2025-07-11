@@ -32,7 +32,7 @@ export default function RemoveGroup() {
         className={"flex items-center justify-between rounded-lg bg-white p-2"}
       >
         <div className={"flex"}>
-          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"small"} />
+          <ProfileIcon imageUrl={user?.avatar_url ?? "None"} size={"small"} />
           <div className={"ml-1"}>
             <p className={"text-sm font-bold"}>{user?.name ?? "None"}</p>
             <p className={"text-xs"}>{config.cg_id}</p>
@@ -84,7 +84,7 @@ export default function RemoveGroup() {
         imageUrl=""
       >
         <div className={"flex flex-col items-center"}>
-          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"large"} />
+          <ProfileIcon imageUrl={user?.avatar_url ?? "None"} size={"large"} />
           <div className={"text-center text-[#92969D]"}>
             The member is no longer part of your cell group.
           </div>

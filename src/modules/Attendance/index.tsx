@@ -1,8 +1,10 @@
 import { useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
+import { useParams } from "react-router";
+import { useAllAttendance } from "@/graphql/hooks/attendance";
+import { ContentPaste } from "@mui/icons-material";
 
 /**
  * AttendanceEvent Interface - Represents a single attendance record
@@ -11,10 +13,9 @@ import ClearIcon from "@mui/icons-material/Clear";
 interface AttendanceEvent {
   date: string;
   day: string;
-  event: string;
+  name: string;
   status: "Attended" | "Absent";
   reason?: string;
-  time?: string;
 }
 
 /**
@@ -27,171 +28,43 @@ interface AttendanceMonth {
   events: AttendanceEvent[];
 }
 
-const attendanceData: AttendanceMonth[] = [
-  {
-    month: "Jan",
-    year: "2025",
-    events: [
-      {
-        date: "25 Jan",
-        day: "Sat",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "24 Jan",
-        day: "Fri",
-        event: "CG Gathering",
-        status: "Attended",
-      },
-      {
-        date: "18 Jan",
-        day: "Sat",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "17 Jan",
-        day: "Fri",
-        event: "CG Gathering",
-        status: "Attended",
-      },
-      {
-        time: "5:30PM",
-        date: "11 Jan",
-        day: "Sat",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "10 Jan",
-        day: "Fri",
-        event: "CG Gathering",
-        status: "Attended",
-      },
-      {
-        date: "04 Jan",
-        day: "Sat",
-        event: "Service",
-        status: "Absent",
-        reason: "Sick",
-      },
-      {
-        date: "03 Jan",
-        day: "Fri",
-        event: "CG Gathering",
-        status: "Absent",
-        reason: "Sick",
-      },
-    ],
-  },
-  {
-    month: "Dec",
-    year: "2024",
-    events: [
-      {
-        date: "24 Dec",
-        day: "Tue",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "17 Dec",
-        day: "Tue",
-        event: "CG Gathering",
-        status: "Absent",
-        reason: "Sick",
-      },
-      {
-        date: "10 Dec",
-        day: "Tue",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "3 Dec",
-        day: "Tue",
-        event: "CG Gathering",
-        status: "Attended",
-      },
-    ],
-  },
-  {
-    month: "Nov",
-    year: "2024",
-    events: [
-      {
-        date: "26 Nov",
-        day: "Sat",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "19 Nov",
-        day: "Sat",
-        event: "CG Gathering",
-        status: "Absent",
-        reason: "Out of town",
-      },
-      {
-        date: "12 Nov",
-        day: "Sat",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "5 Nov",
-        day: "Sat",
-        event: "CG Gathering",
-        status: "Attended",
-      },
-    ],
-  },
-  {
-    month: "Oct",
-    year: "2024",
-    events: [
-      {
-        date: "31 Oct",
-        day: "Sat",
-        event: "Service",
-        status: "Attended",
-      },
-      {
-        date: "24 Oct",
-        day: "Sat",
-        event: "CG Gathering",
-        status: "Attended",
-      },
-      {
-        date: "17 Oct",
-        day: "Sat",
-        event: "Service",
-        status: "Absent",
-        reason: "Family emergency",
-      },
-      {
-        date: "10 Oct",
-        day: "Sat",
-        event: "CG Gathering",
-        status: "Attended",
-      },
-      {
-        date: "3 Oct",
-        day: "Sat",
-        event: "Service",
-        status: "Attended",
-      },
-    ],
-  },
-];
-
-/**
- * Attendance Component - Displays user's attendance records by month
- * 出勤组件 - 按月显示用户的出勤记录
- */
 const Attendance = () => {
   const [expandedMonths, setExpandedMonths] = useState<string[]>(["Jan 2025"]);
+  const { id } = useParams();
+  const { data } = useAllAttendance(id ?? "");
+
+  const attendanceData: AttendanceMonth[] =
+    data?.attendanceCollection?.edges?.reduce(
+      (acc: AttendanceMonth[], edge) => {
+        const node = edge.node;
+        const createdAt = new Date(node.created_at);
+        const month = createdAt.toLocaleString("default", { month: "long" });
+        const year = createdAt.getFullYear().toString();
+
+        // Find existing month or create new one
+        let monthData = acc.find((m) => m.month === month && m.year === year);
+        if (!monthData) {
+          monthData = { month, year, events: [] };
+          acc.push(monthData);
+        }
+
+        // Create attendance event
+        const attendanceEvent: AttendanceEvent = {
+          date: createdAt.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "long",
+          }),
+          day: createdAt.toLocaleDateString("en-GB", { weekday: "short" }),
+          name: node.session.name,
+          status: node.attended ? "Attended" : "Absent",
+          reason: node.description,
+        };
+
+        monthData.events.push(attendanceEvent);
+        return acc;
+      },
+      [],
+    ) || [];
 
   const toggleMonth = (monthYear: string) => {
     setExpandedMonths((prev) =>
@@ -208,76 +81,115 @@ const Attendance = () => {
     return `(${attended}/${events.length})`;
   };
 
+  if (attendanceData.length === 0) {
+    return (
+      <div className="flex flex-grow flex-col bg-white px-4 py-5">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+          <ContentPaste className="text-gray" fontSize="large" />
+          <p className="text-gray text-sm">No attendance data</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-md">
-      <div className="space-y-4">
-        {attendanceData.map((monthData) => {
-          const monthYear = `${monthData.month} ${monthData.year}`;
-          const isExpanded = expandedMonths.includes(monthYear);
+    <div className="flex flex-grow flex-col bg-white px-4 py-5">
+      <div className="flex-grow">
+        <div className="space-y-2">
+          {attendanceData.map((monthData) => {
+            const monthYear = `${monthData.month} ${monthData.year}`;
+            const isExpanded = expandedMonths.includes(monthYear);
 
-          return (
-            <div
-              key={monthYear}
-              className="rounded-lg border border-gray-200 shadow-md"
-            >
-              <button
-                onClick={() => toggleMonth(monthYear)}
-                className="flex w-full items-center justify-between p-3"
+            return (
+              <div
+                key={monthYear}
+                className="border-gray/20 overflow-hidden rounded-lg border p-3 shadow"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium">{monthYear}</span>
-                  <span className="text-gray-500">
-                    {getAttendanceCount(monthData.events)}
+                {/* Accordion Header */}
+                <button
+                  onClick={() => toggleMonth(monthYear)}
+                  className="flex w-full items-center justify-between text-left transition-colors duration-200"
+                >
+                  <span className="text-dark text-sm font-bold">
+                    {monthYear}{" "}
+                    <span className="text-gray text-xs font-normal">
+                      {getAttendanceCount(monthData.events)}
+                    </span>
                   </span>
-                </div>
-                <span className="text-gray-300">
-                  {isExpanded ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-                </span>
-              </button>
 
-              {isExpanded && (
-                <div className="px-3 pb-3">
-                  {monthData.events.map((event, index) => (
-                    <div key={`${event.date}-${index}`} className="py-2">
-                      <div className="text-xs text-gray-500">
-                        {event.time ? `${event.time}, ` : ""}
-                        {event.date} ({event.day})
-                      </div>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div
-                            className={`text-lg ${event.status === "Absent" ? "text-red-600" : ""}`}
+                  <div
+                    className={`transform transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+                  >
+                    <ExpandMoreIcon className="text-gray-600" />
+                  </div>
+                </button>
+
+                {/* Accordion Content */}
+                <div
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    isExpanded ? "opacity-100" : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <div className="flex w-full flex-col pt-3">
+                    {monthData.events.map((e) => (
+                      <div
+                        key={e.date}
+                        className="flex flex-row items-center justify-between"
+                      >
+                        <div className="flex flex-col">
+                          <p className="text-gray text-[10px]">
+                            {e.date} ({e.day})
+                          </p>
+                          <p
+                            className={`${
+                              e.status === "Attended"
+                                ? "text-dark"
+                                : "text-[#AD0000]"
+                            } text-sm font-medium`}
                           >
-                            {event.event}
-                          </div>
-                          {event.reason && (
-                            <div className="text-xs text-red-600">
-                              Reason: {event.reason}
-                            </div>
+                            {e.name}
+                          </p>
+                          {e.status === "Absent" && e.reason ? (
+                            <p className="text-[10px] text-[#AD0000]">
+                              Reason: {e.reason}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-row items-center">
+                          {e.status === "Attended" ? (
+                            <>
+                              <CheckIcon
+                                className="text-dark-neon-green"
+                                style={{
+                                  fontSize: "16px",
+                                }}
+                              />
+                              <p className="text-dark-neon-green text-xs">
+                                {e.status}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <ClearIcon
+                                className="text-[#AD0000]"
+                                style={{
+                                  fontSize: "16px",
+                                }}
+                              />
+                              <p className="text-xs text-[#AD0000]">
+                                {e.status}
+                              </p>
+                            </>
                           )}
                         </div>
-                        <div
-                          className={`${
-                            event.status === "Attended"
-                              ? "text-[#41FAD3]"
-                              : "text-red-600"
-                          } flex min-w-[100px] items-center justify-end gap-1`}
-                        >
-                          {event.status === "Attended" ? (
-                            <CheckIcon />
-                          ) : (
-                            <ClearIcon />
-                          )}{" "}
-                          {event.status}
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

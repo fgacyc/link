@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { Toaster } from "react-hot-toast";
-import { AuthDebugButton } from "./components/AuthDebugButton";
+// import { AuthDebugButton } from "./components/AuthDebugButton";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +36,7 @@ createRoot(document.getElementById("root")!).render(
         />
         <MainRoutes />
       </QueryClientProvider>
-      <AuthDebugButton />
+      {/* <AuthDebugButton /> */}
     </BrowserRouter>
   </StrictMode>,
 );

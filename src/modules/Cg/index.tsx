@@ -1,9 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  fetchSinglePerson,
-  updateSinglePerson,
-} from "../../graphql/declaration";
-import { useGraphQL } from "../../hooks/useGraphQL";
+import { useSinglePerson, useUpdateSinglePerson } from "@/graphql/hooks/user";
 import { type ActionButtonProps } from "../../components/Button";
 import { ButtonGroup } from "../../components/ButtonGroup";
 import { useNavigate } from "react-router";
@@ -18,81 +13,51 @@ export default function CG() {
     { label: "Home", onClick: () => navigate("/"), variant: "primary" },
     {
       label: "Dashboard",
-      onClick: () => navigate("/cg"),
+      onClick: () => navigate("/cg", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Assign Group",
-      onClick: () => navigate("/cg/assign-group"),
+      onClick: () => navigate("/cg/assign-group", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Bind Account",
-      onClick: () => navigate("/cg/bind-account"),
+      onClick: () => navigate("/cg/bind-account", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Remove Group",
-      onClick: () => navigate("/cg/remove-group"),
+      onClick: () => navigate("/cg/remove-group", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Popup",
-      onClick: () => navigate("/cg/popup"),
+      onClick: () => navigate("/cg/popup", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Dialog",
-      onClick: () => navigate("/cg/dialog"),
+      onClick: () => navigate("/cg/dialog", { viewTransition: true }),
       variant: "primary",
     },
     {
       label: "Input",
-      onClick: () => navigate("/cg/input"),
+      onClick: () => navigate("/cg/input", { viewTransition: true }),
       variant: "primary",
     },
   ];
 
-  // Get the mutate function here
-  const { query, mutate, ready } = useGraphQL();
-
-  // Pass the mutate function to the useMutation hook from react-query
-  const { mutate: updatePerson, data: updatedPersonData } = useMutation({
-    mutationFn: ({ name, email }: { name: string; email: string }) => {
-      return mutate(updateSinglePerson, {
-        name,
-        email: email,
-      });
-    },
-  });
+  const { data, refetch } = useSinglePerson("fga.tech@gmail.com");
+  const updatePerson = useUpdateSinglePerson();
 
   // Call the mutate function to update the person
   const handleClick = () => {
-    updatePerson({
+    updatePerson.mutate({
+      uid: "fga.tech@gmail.com",
       name: "FGA Technology.",
-      email: "fga.tech@gmail.com",
     });
   };
-
-  const { data, refetch } = useQuery({
-    queryKey: ["person"],
-    queryFn: async () => {
-      const data = await query(fetchSinglePerson, {
-        email: "fga.tech@gmail.com",
-      });
-      return data;
-    },
-    enabled: ready,
-  });
-
-  // const { data, refetch } = useQuery({
-  //   queryKey: ["person"],
-  //   queryFn: async () => {
-  //     return query(fetchSinglePerson, {
-  //       name: "fga.tech@gmail.com",
-  //     });
-  //   },
-  // });
 
   const btns: ActionButtonProps[] = [
     { label: "Refetch", onClick: () => refetch(), variant: "primary" },

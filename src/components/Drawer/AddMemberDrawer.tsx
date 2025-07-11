@@ -19,17 +19,19 @@ export const AddMemberDrawer = ({ open, setOpen }: AddMemberDrawerProps) => {
     <Drawer open={open} setOpen={setOpen} title="Add Member">
       <div className="mb-10 flex flex-col gap-5">
         <ActionItem
-          onClick={() => navigate("/cg/add-shadow-user")}
+          onClick={() =>
+            navigate("/cg/add-shadow-user", { viewTransition: true })
+          }
           icon={<PersonAddRounded className="text-dark-neon-green" />}
           title="Add Shadow User"
           description="Record the attendance of unregistered members or new friends without requiring immediate registration."
         />
-        <ActionItem
+        {/* <ActionItem
           onClick={() => toast("Invitation Link Copied!")}
           icon={<LinkRounded className="text-dark-neon-green" />}
           title="Copy Invitation Link"
           description="Generate an invitation link to encourage new friends to register and download the app."
-        />
+        /> */}
       </div>
     </Drawer>
   );

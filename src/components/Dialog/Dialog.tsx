@@ -52,33 +52,31 @@ const Dialog: React.FC<DialogProps> = ({
             rounded="small"
             btns={[
               {
-                label: confirmText,
-                onClick: () => {
-                  console.log("confirm");
-                  onConfirm?.();
-                },
-                variant: "primary",
-              },
-              {
                 label: cancelText,
                 onClick: () => {
-                  console.log("cancel");
                   onCancel?.();
                 },
                 variant: "secondary",
+              },
+              {
+                label: confirmText,
+                onClick: () => {
+                  onConfirm?.();
+                },
+                variant: "primary",
               },
             ]}
           />
         ) : (
           <div className="flex flex-col justify-end">
             <button
-              className="rounded-full bg-black py-2 text-center font-semibold text-white"
+              className="bg-dark rounded-full py-2 text-center font-semibold text-white"
               onClick={onConfirm}
             >
               {confirmText}
             </button>
             <button
-              className="mt-2 py-2 text-center font-semibold text-gray-700 hover:text-gray-900"
+              className="text-gray mt-2 py-2 text-center font-semibold"
               onClick={onCancel}
             >
               {cancelText}

@@ -2,14 +2,14 @@ import { useContext, useEffect, useState } from "react";
 import { TitleContext } from "@/providers/TitleContextProvider";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import Input, { DateInput, TelInput } from "@/components/Input";
+import Input, { DateInput, SelectInput, TelInput } from "@/components/Input";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { ActionButton } from "@/components/Button";
-import { useGraphQL } from "@/hooks/useGraphQL";
-import { useMutation } from "@tanstack/react-query";
-import { addShadowUser as addShadowUserFn } from "@/graphql/declaration";
-import { useUser } from "@/stores/useUser";
+import { useCreateShadowUser } from "@/graphql/hooks/shadow-user";
 import Popup from "@/components/Popup/Popup";
+import { useAllPastoralRole, useCGDetails } from "@/graphql";
+import { CgSpinner } from "react-icons/cg";
+import { useNavigate } from "react-router";
 
 type ShadowUserForm = {
   name: string;
@@ -18,10 +18,11 @@ type ShadowUserForm = {
   dob: string;
   remark: string;
   occupation: string;
+  role: string;
 };
 
 export const AddShadowUser = () => {
-  const { setTitle, setWhite, setRightIcon, setFixed } =
+  const { setTitle, setWhite, setRightIcon, setFixed, setBg } =
     useContext(TitleContext);
 
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
@@ -31,7 +32,8 @@ export const AddShadowUser = () => {
     setWhite(false);
     setTitle("Add Shadow User");
     setFixed(false);
-  }, [setRightIcon, setWhite, setTitle, setFixed]);
+    setBg("transparent");
+  }, [setRightIcon, setWhite, setTitle, setFixed, setBg]);
 
   useEffect(() => {
     if (!successDialogOpen) return;
@@ -42,40 +44,29 @@ export const AddShadowUser = () => {
     return () => clearTimeout(timer);
   }, [successDialogOpen]);
 
-  const { cg } = useUser();
+  const { data } = useCGDetails();
+  const cg = data?.connect_groupCollection.edges[0]?.node.id;
 
-  const { mutate } = useGraphQL();
-  // Pass the mutate function to the useMutation hook from react-query
-  const { mutate: addShadowUser } = useMutation({
-    mutationFn: ({
-      name,
-      contact,
-      gender,
-      dob,
-      cg,
-    }: {
-      name: string;
-      contact: string;
-      dob: string;
-      gender: string;
-      cg: string;
-    }) => {
-      return mutate(addShadowUserFn, {
-        name,
-        contact,
-        gender,
-        cg,
-        dob,
-      });
-    },
-  });
+  const { data: pastoralRoles, isLoading } = useAllPastoralRole();
+  const mappedPastoralRoles = pastoralRoles?.pastoral_roleCollection.edges
+    // Filter out the CGL
+    .filter((role) => role.node.id !== "rol_fd249a3111bb4dceb57f")
+    .map((role) => ({ label: role.node.name, value: role.node.id }));
+
+  const addShadowUser = useCreateShadowUser();
+  const navigate = useNavigate();
 
   return (
     <>
       <Popup
         isOpen={successDialogOpen}
         title="Created Shadow User"
-        onClose={() => setSuccessDialogOpen(false)}
+        onClose={() => {
+          setSuccessDialogOpen(false);
+          navigate("/cg", {
+            viewTransition: true,
+          });
+        }}
         customImage={
           <img
             src="/task_done.png"
@@ -90,96 +81,121 @@ export const AddShadowUser = () => {
         </p>
       </Popup>
       <div className="flex h-full w-full flex-col gap-5 px-4">
-        <p className="text-sm text-[#92969D]">
-          Please complete all fields so we can learn more about you! This will
-          help us assign you to the group that fits you best.
-        </p>
-        <Formik<ShadowUserForm>
-          initialValues={{
-            name: "",
-            contact: "",
-            gender: "",
-            dob: "",
-            occupation: "",
-            remark: "",
-          }}
-          validateOnChange={false}
-          onSubmit={(values, action) => {
-            action.setSubmitting(true);
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <CgSpinner className="animate-spin" color="#41FAD3" size={28} />
+            <p className="text-center">Loading...</p>
+          </div>
+        ) : (
+          <Formik<ShadowUserForm>
+            initialValues={{
+              name: "",
+              contact: "",
+              gender: "",
+              role: mappedPastoralRoles?.[0]?.value ?? "",
+              dob: "",
+              occupation: "",
+              remark: "",
+            }}
+            validateOnChange={false}
+            onSubmit={(values, action) => {
+              action.setSubmitting(true);
 
-            addShadowUser(
-              { ...values, cg: cg ?? "" },
-              {
-                onSuccess: () => {
-                  action.resetForm();
-                  setSuccessDialogOpen(true);
+              addShadowUser.mutate(
+                {
+                  name: values.name.trim(),
+                  cg: cg ?? "",
+                  metadata: JSON.stringify({
+                    contact: values.contact.trim(),
+                    occupation: values.occupation.trim(),
+                    remarks: values.remark.trim(),
+                  }),
+                  role: values.role.trim(),
+                  gender: values.gender.trim(),
+                  dob: values.dob,
                 },
-
-                onSettled: () => {
-                  action.setSubmitting(false);
+                {
+                  onSuccess: () => {
+                    action.resetForm();
+                    setSuccessDialogOpen(true);
+                  },
+                  onSettled: () => {
+                    action.setSubmitting(false);
+                  },
                 },
-              },
-            );
-          }}
-          validationSchema={Yup.object().shape({
-            name: Yup.string().required("Required."),
-            contact: Yup.string()
-              .required("Required.")
-              .test("validity", "Invalid Phone Number.", (val) => {
-                if (val) {
-                  return isValidPhoneNumber(val);
-                }
-              }),
-            gender: Yup.string().required("Required."),
-            dob: Yup.date(),
-            occupation: Yup.string(),
-            remark: Yup.string(),
-          })}
-        >
-          {({ submitForm, isSubmitting }) => (
-            <Form className="flex w-full flex-col gap-3">
-              <Input
-                label="Name"
-                name="name"
-                placeholder="Please enter the name"
-                required
-              />
-              <TelInput
-                label="Contact No."
-                required
-                name="contact"
-                placeholder="Etc: 123456789"
-              />
-              <Input
-                type="radio"
-                label="Gender"
-                name="gender"
-                options={[
-                  { label: "Male", value: "male" },
-                  { label: "Female", value: "female" },
-                ]}
-              />
-              <DateInput label="Date of birth" name="dob" />
-              <Input
-                label="Occupation"
-                name="occupation"
-                placeholder="Please enter the occupation"
-              />
-              <Input
-                label="Remark"
-                name="remark"
-                placeholder="Only you can see this remark"
-              />
-              <ActionButton
-                extendedPaddingY
-                disabled={isSubmitting}
-                type="submit"
-                label="Add"
-                onClick={submitForm}
-              />
-            </Form>
-          )}
-        </Formik>
+              );
+            }}
+            validationSchema={Yup.object().shape({
+              name: Yup.string().required("Required."),
+              contact: Yup.string()
+                .required("Required.")
+                .test("validity", "Invalid Phone Number.", (val) => {
+                  if (val) {
+                    return isValidPhoneNumber(val);
+                  }
+                }),
+              gender: Yup.string().required("Required."),
+              dob: Yup.date(),
+              occupation: Yup.string(),
+              remark: Yup.string(),
+              role: Yup.string().required("Required."),
+            })}
+          >
+            {({ submitForm, isSubmitting }) => (
+              <Form className="flex w-full flex-col gap-3">
+                <Input
+                  label="Name"
+                  name="name"
+                  placeholder="Please enter the name"
+                  required
+                />
+                <TelInput
+                  label="Contact No."
+                  required
+                  name="contact"
+                  placeholder="Etc: 123456789"
+                />
+                <Input
+                  type="radio"
+                  label="Gender"
+                  name="gender"
+                  options={[
+                    { label: "Male", value: "male" },
+                    { label: "Female", value: "female" },
+                  ]}
+                />
+                <SelectInput
+                  required
+                  label="Pastoral Role"
+                  name="role"
+                  loading={isLoading}
+                  options={
+                    mappedPastoralRoles ?? [{ label: "Loading...", value: "" }]
+                  }
+                />
+                <DateInput label="Date of birth" name="dob" />
+                <Input
+                  label="Occupation"
+                  name="occupation"
+                  placeholder="Please enter the occupation"
+                />
+                <Input
+                  label="Remark"
+                  name="remark"
+                  placeholder="Only you can see this remark"
+                />
+                <ActionButton
+                  extendedPaddingY
+                  disabled={isSubmitting}
+                  type="button"
+                  loading={isSubmitting}
+                  label="Add"
+                  onClick={submitForm}
+                />
+              </Form>
+            )}
+          </Formik>
+        )}
       </div>
     </>
   );

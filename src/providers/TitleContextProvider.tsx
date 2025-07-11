@@ -10,12 +10,14 @@ export const TitleContext = createContext<{
   setTitle: Dispatch<SetStateAction<string>>;
   rightIcon: React.ReactNode;
   setRightIcon: Dispatch<SetStateAction<React.ReactNode>>;
-  transparent: boolean;
-  setTransparent: Dispatch<SetStateAction<boolean>>;
   white: boolean;
   setWhite: Dispatch<SetStateAction<boolean>>;
   fixed: boolean;
   setFixed: Dispatch<SetStateAction<boolean>>;
+  bg: `#${string}` | "transparent";
+  setBg: Dispatch<SetStateAction<`#${string}` | "transparent">>;
+  hasUnsavedChanges: boolean;
+  setHasUnsavedChanges: Dispatch<SetStateAction<boolean>>;
 }>({
   title: "",
   setTitle: () => undefined, // provide explicit return value
@@ -23,10 +25,12 @@ export const TitleContext = createContext<{
   setFixed: () => undefined,
   rightIcon: null,
   setRightIcon: () => undefined,
-  transparent: false,
-  setTransparent: () => undefined,
   white: false,
   setWhite: () => undefined,
+  bg: "transparent",
+  setBg: () => undefined,
+  hasUnsavedChanges: false,
+  setHasUnsavedChanges: () => undefined,
 });
 
 export const TitleContextProvider = ({
@@ -36,9 +40,10 @@ export const TitleContextProvider = ({
 }) => {
   const [title, setTitle] = useState("");
   const [rightIcon, setRightIcon] = useState<React.ReactNode>(null);
-  const [transparent, setTransparent] = useState(false);
+  const [bg, setBg] = useState<`#${string}` | "transparent">("transparent");
   const [white, setWhite] = useState(false);
   const [fixed, setFixed] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   return (
     <TitleContext.Provider
@@ -49,10 +54,12 @@ export const TitleContextProvider = ({
         setTitle,
         rightIcon,
         setRightIcon,
-        transparent,
-        setTransparent,
+        bg,
+        setBg,
         white,
         setWhite,
+        hasUnsavedChanges,
+        setHasUnsavedChanges,
       }}
     >
       {children}

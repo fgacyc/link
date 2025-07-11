@@ -3,22 +3,33 @@ import React, { useContext, useState, useEffect } from "react";
 import { ProfileIcon } from "@/components/ProfileIcon";
 
 import ActivityIndicator from "@/components/ActivityIndicator";
-import Input from "@/components/Input";
+import Input, { AutoCompleteInput, DateInput } from "@/components/Input";
 import { ActionButton } from "@/components/Button";
 import Dialog from "@/components/Dialog/Dialog";
 import Popup from "@/components/Popup/Popup";
-import { Formik } from "formik";
-import { Form, useParams } from "react-router";
+import { Formik, Form } from "formik";
+import { useParams } from "react-router";
 import { useUser } from "@/stores/useUser";
+import {
+  useLatestCGAttendance,
+  useSinglePerson,
+  getAllCGWithParams,
+} from "@/graphql";
+import { getLevelfromAttendanceDate } from "@/utils";
+import * as Yup from "yup";
 
 export default function AssignGroup() {
-  const { setTitle } = useContext(TitleContext);
+  const { setTitle, setBg, setHasUnsavedChanges, setWhite, setFixed } =
+    useContext(TitleContext);
 
-  const { cgName } = useParams();
+  const { id } = useParams();
 
   useEffect(() => {
-    setTitle("Assign Group");
-  }, [setTitle]);
+    setTitle("Assign to Other Group");
+    setFixed(false);
+    setWhite(false);
+    setBg("transparent");
+  }, [setTitle, setFixed, setWhite, setBg]);
 
   const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -27,86 +38,109 @@ export default function AssignGroup() {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
 
-  const config = {
-    cg_id: "CG 12345",
-    cg_name: "Kuchai | Ps Melvin Team | Kris cg",
-    leader_name: "Kris Mok",
-    group_name: "Kris CG",
-  };
+  const { data: member, isLoading } = useSinglePerson(id ?? "");
+  const { data: attendance } = useLatestCGAttendance(member?.id ?? "");
 
   type AssignGroupForm = {
     cgName: string;
-    whenToAssign: string;
+    // whenToAssign: string;
   };
 
+  if (isLoading) return <div>Loading...</div>;
+
+  if (!member) return <div>Member not found</div>;
+
+  const cg = member.user_connect_groupCollection.edges[0]?.node.connect_group;
   return (
-    <div className="flex h-full flex-grow flex-col justify-between px-6">
+    <div className="flex h-full flex-grow flex-col gap-4 px-4">
+      <div className="flex flex-col gap-3">
+        <div
+          className={
+            "flex items-center justify-between rounded-sm bg-white p-2"
+          }
+        >
+          <div className={"flex flex-row items-center gap-2"}>
+            <ProfileIcon
+              imageUrl={member?.avatar_url ?? ""}
+              isVerified={!member.id.startsWith("shadow|")}
+              size="small"
+            />
+            <div className={"flex flex-col"}>
+              <p className={"text-sm font-semibold text-black"}>
+                {member.name ?? "None"}
+              </p>
+              <p className={"text-dark text-[10px]"}>{cg?.name}</p>
+              <p className={"text-gray text-[10px]"}>CG ID: {cg?.id}</p>
+            </div>
+          </div>
+          <ActivityIndicator
+            level={getLevelfromAttendanceDate(
+              attendance?.latest_attendance.edges[0]?.node.created_at ?? "",
+            )}
+          />
+        </div>
+        <div className={"text-sm text-[#92969D]"}>
+          Please search a CG name to assign this member to other group.
+        </div>
+      </div>
       <Formik<AssignGroupForm>
         initialValues={{
           cgName: "",
-          whenToAssign: "",
+          // whenToAssign: "",
         }}
+        validationSchema={Yup.object().shape({
+          cgName: Yup.string().required("CG Name is required."),
+          // whenToAssign: Yup.string().required("Date is required."),
+        })}
         onSubmit={(values, actions) => {
           console.log(values);
         }}
       >
-        <div
-          className={
-            "flex items-center justify-between rounded-lg bg-white p-2"
-          }
-        >
-          <div className={"flex items-center"}>
-            <ProfileIcon
-              imageUrl={
-                user?.picture ?? `https://placehold.co/40?text=${user?.name}`
-              }
-              size={"small"}
-            />
-            <div className={"ml-1"}>
-              <p className={"text-sm font-bold"}>{user?.name ?? "None"}</p>
-              <p className={"text-xs"}>{config.cg_id}</p>
-              <p className={"text-xs text-[#92969D]"}>{config.cg_name}</p>
-            </div>
-          </div>
-          <ActivityIndicator level={"high"} />
-        </div>
-        <div className={"my-3 text-sm text-[#92969D]"}>
-          Please search a CG name to assign this member to other group.
-        </div>
-        <Form className="relative flex h-full flex-grow flex-col">
-          <Input
+        <Form className="flex flex-col gap-5">
+          <AutoCompleteInput
             label="CG Name"
             name="cgName"
-            required
             placeholder="Please enter CG name, etc: CYC 123"
+            onSearch={async (query) => {
+              try {
+                // Call the API directly with the current query
+                const searchResults = await getAllCGWithParams(`%${query}%`);
+
+                // Transform the GraphQL response to match the expected format
+                if (searchResults?.connect_groupCollection?.edges) {
+                  return searchResults.connect_groupCollection.edges.map(
+                    (edge) => ({
+                      id: edge.node.id,
+                      label: `${edge.node.name} (${edge.node.satellite.name})`,
+                      value: edge.node.name,
+                    }),
+                  );
+                }
+
+                return [];
+              } catch (error) {
+                console.error("Error searching CGs:", error);
+                return [];
+              }
+            }}
           />
 
-          <Input
-            label="When to assign"
-            name="date"
-            type="date"
-            required
+          {/* <DateInput
+            label="When to assign?"
+            name="whenToAssign"
             placeholder="Please select a date"
-          />
+          /> */}
         </Form>
-
-        {/*  Assign group */}
-        {/* fix to bottom*/}
-        <div className={"sticky bottom-0 flex w-full flex-col gap-2"}>
-          <ActionButton
-            label={"Assign Now"}
-            onClick={() => {
-              setIsDialogOpen(true);
-            }}
-          />
-          <ActionButton
-            label={"Cancel Assign"}
-            onClick={() => {
-              setIsCancelDialogOpen(true);
-            }}
-          />
-        </div>
       </Formik>
+
+      <div className={"sticky flex w-full flex-col gap-2"}>
+        <ActionButton
+          label={"Assign Now"}
+          onClick={() => {
+            setIsDialogOpen(true);
+          }}
+        />
+      </div>
       <Dialog
         isOpen={isDialogOpen}
         title="Confirmation to Assign"
@@ -124,8 +158,8 @@ export default function AssignGroup() {
         }}
         vertical={true}
       >
-        <div className={"flex flex-col items-center"}>
-          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"large"} />
+        {/* <div className={"flex flex-col items-center"}>
+          <ProfileIcon imageUrl={user?.avatar_url ?? "None"} size={"large"} />
           <div className={"text-center text-[#92969D]"}>
             Are you sure want to assign this member to
             <b className={"ml-2 text-black"}>{config.cg_id}</b>?
@@ -140,7 +174,7 @@ export default function AssignGroup() {
             <div>Group Name:</div>
             <div className={"font-bold"}>{config.group_name}</div>
           </div>
-        </div>
+        </div> */}
       </Dialog>
       <Popup
         isOpen={isPopupOpen}
@@ -153,7 +187,7 @@ export default function AssignGroup() {
         imageUrl=""
       >
         <div className={"flex flex-col items-center"}>
-          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"large"} />
+          <ProfileIcon imageUrl={user?.avatar_url ?? "None"} size={"large"} />
           <div className={"text-center text-[#92969D]"}>
             Please wait. Now the member is still under approval from the new
             cell group.
@@ -176,8 +210,8 @@ export default function AssignGroup() {
         }}
         vertical={true}
       >
-        <div className={"flex flex-col items-center"}>
-          <ProfileIcon imageUrl={user?.picture ?? "None"} size={"large"} />
+        {/* <div className={"flex flex-col items-center"}>
+          <ProfileIcon imageUrl={user?.avatar_url ?? "None"} size={"large"} />
           <div className={"text-center text-[#92969D]"}>
             Are you sure want to cancel assign this memeber to
             <b className={"ml-2 text-black"}>{config.cg_id}</b>?
@@ -192,7 +226,7 @@ export default function AssignGroup() {
             <div>Group Name:</div>
             <div className={"font-bold"}>{config.group_name}</div>
           </div>
-        </div>
+        </div> */}
       </Dialog>
       <Popup
         isOpen={isCancelPopupOpen}

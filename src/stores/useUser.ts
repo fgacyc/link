@@ -1,71 +1,117 @@
-import { create, type StateCreator } from "zustand";
-import { jwtDecode } from "jwt-decode";
-import { type UserFromToken } from "@/types";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
-// import i18n from "@/locales/i18n";
+import { jwtDecode } from "jwt-decode";
+import type {
+  Auth0ToGraphQLUserMapping,
+  GetSinglePersonHookResponse,
+} from "@/types/graphql";
+import { GET_SINGLE_PERSON } from "@/graphql/hooks/user";
+import { getAuthHeaders } from "@/graphql/server";
+import { executeQuery } from "@/graphql/queries";
 
-type UserStore = {
-  token: string | null;
-  language: string;
-  initUser: () => Promise<UserFromToken | undefined>;
-  UID: string | null;
-  user: UserFromToken | null;
+interface UserStore {
+  user: Auth0ToGraphQLUserMapping | null;
+  token: string;
+  uid: string;
+  initUser: () => Promise<Auth0ToGraphQLUserMapping | undefined>;
+  setUser: (user: Auth0ToGraphQLUserMapping) => void;
+  setToken: (token: string) => void;
+  setUid: (uid: string) => void;
+  logout: () => void;
   isLoading: boolean;
-  cg: string | null;
-  setCG: (cg: string) => void;
-};
-
-function extractTokenAndLanguage(url: string) {
-  const regex = /token=([^&]+).*?&language=([^&]+)/;
-  const match = regex.exec(url);
-  if (match) {
-    const token = match[1];
-    const language = match[2];
-    return { token: token, language: language };
-  } else {
-    return { token: null, language: null };
-  }
 }
 
-const createState: StateCreator<UserStore> = (set) => {
-  return {
-    token: null,
-    user: null,
-    UID: null,
-    language: "en",
-    isLoading: false,
-    cg: null,
-    setCG: (cg: string) => set({ cg: cg }),
-    initUser: async () => {
-      set({ isLoading: true });
-      const currentUrl = window.location.href;
-      const { token } = extractTokenAndLanguage(currentUrl);
-      console.log("token", token);
-      if (!token) return;
-      set({ token: token });
-      // if (language) set({ language: language });
-      // void i18n.changeLanguage(language);
-      const decodedData = jwtDecode(token);
-      if (!decodedData) return;
-      set({ UID: decodedData.sub });
-      const domain = decodedData.aud?.[1];
-      if (!domain) return;
-      const response = await fetch(domain, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = (await response.json()) as UserFromToken;
-      if (!data) {
-        set({ isLoading: false });
-        return false;
-      }
+interface JWTPayload {
+  sub: string;
+  email: string;
+  name?: string;
+  given_name?: string;
+  nickname?: string;
+  picture?: string;
+  email_verified?: boolean;
+  updated_at?: string;
+  exp?: number;
+  iat?: number;
+}
 
-      set({ user: data });
-      set({ isLoading: false });
-      return data;
+export const useUser = create<UserStore>()(
+  persist(
+    (set) => ({
+      isLoading: false,
+      user: null,
+      token: "",
+      uid: "",
+      initUser: async () => {
+        set({ isLoading: true });
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlToken = urlParams.get("token");
+
+          if (!urlToken) {
+            return;
+          }
+
+          // Decode the JWT token directly
+          const decodedToken = jwtDecode<JWTPayload>(urlToken);
+
+          if (!decodedToken) {
+            return;
+          }
+
+          // Set token and user data
+          set({ token: urlToken });
+          set({ uid: decodedToken.sub });
+
+          // when user is populated, fetch the user details from graphql
+          const userDetails = await executeQuery(
+            GET_SINGLE_PERSON,
+            { uid: decodedToken.sub },
+            getAuthHeaders(),
+          );
+          const response = userDetails as GetSinglePersonHookResponse;
+          const ud = response.userCollection.edges[0]?.node ?? null;
+          const cg =
+            ud?.user_connect_groupCollection.edges[0]?.node.connect_group.id ??
+            "";
+
+          console.log(ud);
+
+          const mappedUser: Auth0ToGraphQLUserMapping = {
+            id: decodedToken.sub,
+            name: ud?.name ?? "",
+            email: decodedToken.email,
+            email_verified: decodedToken.email_verified ?? false,
+            given_name: ud?.given_name ?? decodedToken.given_name ?? "",
+            nickname: ud?.nickname ?? decodedToken.nickname ?? "",
+            avatar_url: ud?.avatar_url ?? decodedToken.picture ?? "",
+            updated_at: decodedToken.updated_at ?? new Date().toISOString(),
+            cg: cg,
+          };
+
+          set({ user: mappedUser });
+
+          // Clean up URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete("token");
+
+          set({ isLoading: false });
+          window.history.replaceState({}, document.title, url.toString());
+
+          return mappedUser;
+        } catch (error) {
+          console.error("Error initializing user:", error);
+          set({ isLoading: false });
+          return;
+        }
+      },
+
+      setUser: (user) => set({ user }),
+      setToken: (token) => set({ token }),
+      setUid: (uid) => set({ uid }),
+      logout: () => set({ user: null, token: "", uid: "" }),
+    }),
+    {
+      name: "user-storage",
     },
-  };
-};
-
-export const useUser = create(persist(createState, { name: "link-user" }));
+  ),
+);

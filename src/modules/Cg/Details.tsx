@@ -1,117 +1,58 @@
 import {
-  ContentCopyRounded,
-  Flag,
   GroupAddRounded,
-  GroupRounded,
   InfoOutlined,
   ManageAccountsRounded,
 } from "@mui/icons-material";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TitleContext } from "@/providers/TitleContextProvider";
 import { useContext } from "react";
 import { Icon } from "@/components/Icon";
-import { Button } from "@/components/Button";
-import { ProfileIcon } from "@/components/ProfileIcon";
-import ActivityIndicator, {
-  type ActivityIndicatorProps,
-} from "@/components/ActivityIndicator";
 
 import { MemberEngagementLevelDrawer } from "@/components/Drawer/MemberEngagementLevelDrawer";
 import { AddMemberDrawer } from "@/components/Drawer/AddMemberDrawer";
-import { useGraphQL } from "@/hooks/useGraphQL";
-import { getCGMembers, getShadowUserCG } from "@/graphql/declaration";
-import { useQuery } from "@tanstack/react-query";
+import { useCGMembers } from "@/graphql/hooks/connect-group";
 import { useUser } from "@/stores/useUser";
-import type { MaybeShadowUser, User } from "@/types";
 import { CgSpinner } from "react-icons/cg";
+import { MemberListItem } from "@/components/MemberListItem";
+import type { CGMemberUser } from "@/types/graphql";
+import { CGHeader } from "./Header";
+import { Link } from "react-router";
 
 const filters = [
   {
     label: "All",
-    filter: (a: MaybeShadowUser) => a,
+    filter: (a: CGMemberUser) => a,
   },
   {
     label: "Pending",
-    filter: (a: MaybeShadowUser) => a,
+    filter: (a: CGMemberUser) => a,
   },
   // {
   //   label: "New Friend",
-  //   filter: (a: MaybeShadowUser) => a.role === "NF",
+  //   filter: (a: CGMemberUser) => a.role === "NF",
   // },
   {
     label: "Unverified",
-    filter: (a: MaybeShadowUser) => a.shadow === true,
+    filter: (a: CGMemberUser) => a.id.startsWith("shadow|"),
   },
 ];
 
-// const members: MaybeShadowUser[] = [
-//   {
-//     name: "Jing Ling",
-//     avatar_url: "https://placehold.co/40x40?text=Jing+Ling",
-//     role: "CGL",
-//     lastAttended: new Date("2025-12-12"),
-//     id: "1",
-//     activityLevel: "high",
-//     shadow: false,
-//   },
-//   {
-//     name: "Kenny L",
-//     avatar_url: "https://placehold.co/40x40?text=Kenny+L",
-//     role: "OM",
-//     lastAttended: new Date("2025-11-25"),
-//     id: "2",
-//     activityLevel: "medium",
-//     shadow: false,
-//   },
-//   {
-//     name: "John",
-//     avatar_url: "https://placehold.co/40x40?text=John",
-//     role: "NB",
-//     lastAttended: new Date("2024-11-23"),
-//     id: "3",
-//     activityLevel: "low",
-//     shadow: false,
-//   },
-//   {
-//     name: "Peter",
-//     avatar_url: "https://placehold.co/40x40?text=Peter",
-//     role: "NF",
-//     lastAttended: new Date("2024-11-23"),
-//     id: "4",
-//     activityLevel: "low",
-//     shadow: false,
-//   },
-//   {
-//     name: "Sandra",
-//     avatar_url: "https://placehold.co/40x40?text=Sandra",
-//     role: "NF",
-//     lastAttended: new Date("2025-11-25"),
-//     id: "5",
-//     activityLevel: "none",
-//     shadow: false,
-//   },
-//   {
-//     name: "Daniel",
-//     avatar_url: "https://placehold.co/40x40?text=Daniel",
-//     role: "OM",
-//     lastAttended: new Date("2025-11-25"),
-//     id: "6",
-//     activityLevel: "high",
-//     shadow: true,
-//   },
-//   {
-//     name: "Jenny",
-//     avatar_url: "https://placehold.co/40x40?text=Jenny",
-//     role: "NF",
-//     lastAttended: new Date("2025-11-25"),
-//     id: "7",
-//     activityLevel: "none",
-//     shadow: true,
-//   },
-// ];
+// Role priority mapping for sorting (lower number = higher priority)
+const rolePriority: Record<string, number> = {
+  rol_fd249a3111bb4dceb57f: 1, // Connect Group Leader
+
+  rol_930865293a64447e91ea: 2, // Pastor (highest priority if present)
+  rol_482a585b8f764e19a90a: 3, // Team Leader
+  rol_3646e05f277b4e218d00: 4, // Coach
+  rol_77a177d4e38b4fbea80d: 5, // Small Group Leader
+  rol_95fbb421e5054e3d8f2f: 6, // Ordinary Member
+  rol_3de137627bc145d7b411: 7, // New Believer
+  rol_1ecba215831345f48abf: 8, // New Friend
+  pastoral_rol_9a0d9968: 9, // test11 (fallback)
+};
 
 const Details = () => {
-  const { setTitle, setRightIcon, setTransparent, setFixed, setWhite } =
+  const { setTitle, setRightIcon, setBg, setFixed, setWhite } =
     useContext(TitleContext);
 
   const [memberEngagementDrawerOpen, setMemberEngagementDrawerOpen] =
@@ -120,91 +61,28 @@ const Details = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
   const searchRef = useRef<HTMLInputElement>(null);
-  const { UID, setCG } = useUser();
+  const { uid } = useUser();
 
-  const { ready, query } = useGraphQL();
+  const { data } = useCGMembers(uid);
 
-  const { data } = useQuery({
-    queryKey: ["user_connect_group"],
-    queryFn: async () => {
-      const data = (await query(getCGMembers, { uid: UID })) as {
-        user_connect_groupCollection: {
-          edges: {
-            node: {
-              connect_group: {
-                id: string;
-                user_connect_groupCollection: {
-                  edges: {
-                    node: {
-                      user: User;
-                    };
-                  }[];
-                };
-              };
-            };
-          }[];
-        };
-      };
-
-      setCG(
-        data.user_connect_groupCollection.edges[0]?.node.connect_group.id ?? "",
-      );
-      return data;
-    },
-    enabled: ready,
-  });
-
-  const cgid =
-    data?.user_connect_groupCollection.edges[0]?.node.connect_group.id;
-
-  const { data: shadowUserData } = useQuery({
-    queryKey: ["shadow_user_connect_group"],
-    queryFn: async () => {
-      const data = (await query(getShadowUserCG, { cgid })) as {
-        shadow_userCollection: {
-          edges: {
-            node: User & {
-              nodeId: string;
-              pastoral_status: string;
-            };
-          }[];
-        };
-      };
-      return data;
-    },
-    enabled: ready && !!cgid,
-  });
-
-  const members: MaybeShadowUser[] =
-    data?.user_connect_groupCollection.edges.flatMap((a) =>
-      a.node.connect_group.user_connect_groupCollection.edges.map((b) => ({
-        ...b.node.user,
-        shadow: false,
-        pastoral_status: null,
-      })),
-    ) ?? [];
-
-  const shadowMembers: MaybeShadowUser[] =
-    shadowUserData?.shadow_userCollection.edges.map((a) => ({
-      ...a.node,
-      id: a.node.nodeId,
-      role: a.node.pastoral_status,
-      shadow: true,
-      pastoral_status: null,
-    })) ?? [];
-
-  const combinedMembers = useMemo(
-    () => [...members, ...shadowMembers],
-    [members, shadowMembers],
+  const members = data?.user_connect_groupCollection.edges.flatMap((a) =>
+    a.node.connect_group.user_connect_groupCollection.edges.map((b) => ({
+      ...b.node.user,
+      role: b.node.user_role,
+    })),
   );
 
   useEffect(() => {
     setTitle("CG Details");
-    setTransparent(true);
+    setBg("#242424");
     setWhite(true);
     setFixed(true);
-    setRightIcon(<ManageAccountsRounded className="text-dark-neon-green" />);
-  }, [setTitle, setRightIcon, setTransparent, setWhite]);
+    setRightIcon(
+      <Link to="/cg/manage" viewTransition>
+        <ManageAccountsRounded className="text-dark-neon-green" />
+      </Link>,
+    );
+  }, [setTitle, setRightIcon, setBg, setWhite, setFixed]);
 
   return (
     <>
@@ -224,55 +102,7 @@ const Details = () => {
         icon={<GroupAddRounded />}
       /> */}
       <div className="h-full w-full">
-        <div className="header-bg flex w-full flex-col gap-3 rounded-b-[18px] px-4 pt-19 pb-5 text-white">
-          <div className="flex w-full flex-col gap-5 pt-11">
-            <p className="text-sm font-bold">Satellite: Kuchai</p>
-            <img
-              src="https://placehold.co/350x170?text=CG+Cover+Photo"
-              alt="Cover"
-              className="w-full rounded-sm object-cover"
-            />
-          </div>
-          <div className="flex flex-row items-center justify-between">
-            <p className="text-lg font-bold">JingLing's Group</p>
-            <Button
-              label="Numbers"
-              onClick={() => {
-                console.log("numbers");
-              }}
-            />
-          </div>
-          <div className="text-info-gray flex flex-col gap-1.5">
-            <div className="flex flex-row items-center gap-1">
-              <p className="text-sm">{combinedMembers.length ?? 0}</p>
-              <GroupRounded
-                sx={{
-                  fontSize: 12,
-                }}
-              />
-            </div>
-            <div className="flex flex-row items-center gap-1">
-              <p className="text-sm">CG Name: CYC123G</p>
-              <ContentCopyRounded
-                sx={{
-                  fontSize: 14,
-                }}
-                role="button"
-              />
-            </div>
-            <div className="flex flex-row items-center gap-1.5">
-              <p className="text-sm">Kuchai</p>
-              <div className="bg-info-gray h-[8px] w-[1px]" />
-              <p className="text-sm">Daniel Seakny Team</p>
-              <div className="bg-info-gray h-[8px] w-[1px]" />
-              <p className="text-sm">M2 Junior</p>
-            </div>
-          </div>
-          <p className="text-sm">
-            This a a warm group, lorem Ipsum dasd as sa dsa fogksa dosa doas
-          </p>
-        </div>
-
+        <CGHeader members={members ?? []} />
         <div className="flex w-full flex-col gap-3 px-4 pt-3">
           <div className="flex w-full flex-row items-center justify-between">
             <div className="flex w-full flex-row items-center gap-1">
@@ -306,7 +136,7 @@ const Details = () => {
                 setSearchText(e.target.value);
               }}
               placeholder="Search member"
-              className="placeholder:text-gray w-full text-sm text-black"
+              className="placeholder:text-gray text-dark w-full text-sm"
             />
             <Icon
               onClick={() => {
@@ -331,8 +161,8 @@ const Details = () => {
             ))}
           </div>
           <div className="flex h-full w-full flex-grow flex-col">
-            {combinedMembers.length > 0 ? (
-              combinedMembers
+            {members && members?.length > 0 ? (
+              members
                 .filter((a) => {
                   if (!selectedFilter) return a;
                   return filters
@@ -340,48 +170,20 @@ const Details = () => {
                     ?.filter(a);
                 })
                 .filter((a) =>
-                  a.name.toLowerCase().includes(searchText.toLowerCase()),
+                  (a.name ?? "")
+                    .toLowerCase()
+                    .includes(searchText.toLowerCase()),
                 )
+                .sort((a, b) => {
+                  const priorityA = rolePriority[a.role] ?? 999;
+                  const priorityB = rolePriority[b.role] ?? 999;
+                  return priorityA - priorityB;
+                })
                 .map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex flex-row items-center justify-between py-2"
-                  >
-                    <div className="flex flex-row items-center gap-2">
-                      <ProfileIcon
-                        isVerified={!member.shadow}
-                        imageUrl={
-                          member.avatar_url ??
-                          `https://placehold.co/40x40?text=${member.name.replaceAll(" ", "+")}`
-                        }
-                        size="mini"
-                      />
-                      <div className="flex flex-col">
-                        <div className="flex flex-row items-center gap-1">
-                          {member.pastoral_status === "CGL" ? (
-                            <Flag className="text-dark-neon-green size-[16px]" />
-                          ) : null}
-                          <p className="text-sm font-semibold">
-                            {member.name}
-                            {member.id === "1" ? (
-                              <span className="text-dark-neon-green text-[12px] font-normal">
-                                {" "}
-                                (Me)
-                              </span>
-                            ) : null}
-                          </p>
-                        </div>
-                        <p className="text-gray text-[10px]">
-                          Last attended date:{" "}
-                          {/* {member.lastAttended.toLocaleDateString()} */}
-                        </p>
-                      </div>
-                    </div>
-                    {/* <ActivityIndicator level={member.activityLevel} /> */}
-                  </div>
+                  <MemberListItem key={member.id} member={member} />
                 ))
             ) : (
-              <div className="justfiy-center flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center justify-center gap-2">
                 <CgSpinner className="animate-spin" color="#41FAD3" size={28} />
                 <p className="text-center">Loading...</p>
               </div>

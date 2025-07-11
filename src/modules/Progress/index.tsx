@@ -105,45 +105,52 @@ const Progress: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-4 p-1">
-      {msjItems.map((item: MSJItem) => (
-        <div key={item.id} className="flex rounded-lg bg-white p-4 shadow-md">
-          <div className="mr-4 h-20 w-20 rounded-lg bg-gray-200" />
-          <div className="min-w-0 flex-1">
-            <h3 className="mb-1 truncate text-sm font-medium text-gray-900">
-              {item.title}
-            </h3>
+    <div className="flex flex-grow flex-col bg-white px-4 py-5">
+      <div className="flex-grow">
+        <div className="space-y-4 p-1">
+          {msjItems.map((item: MSJItem) => (
+            <div
+              key={item.id}
+              className="flex rounded-lg bg-white p-4 shadow-md"
+            >
+              <div className="mr-4 h-20 w-20 rounded-lg bg-gray-200" />
+              <div className="min-w-0 flex-1">
+                <h3 className="mb-1 truncate text-sm font-medium text-gray-900">
+                  {item.title}
+                </h3>
 
-            {item.status === "locked" ? (
-              <div className="mb-1 flex items-center gap-1 text-sm text-gray-400">
-                <svg
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12 17a2 2 0 100-4 2 2 0 000 4z" />
-                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H8.9V6z" />
-                </svg>
-                {item.lockMessage}
+                {item.status === "locked" ? (
+                  <div className="mb-1 flex items-center gap-1 text-sm text-gray-400">
+                    <svg
+                      className="h-4 w-4"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M12 17a2 2 0 100-4 2 2 0 000 4z" />
+                      <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H8.9V6z" />
+                    </svg>
+                    {item.lockMessage}
+                  </div>
+                ) : (
+                  <span
+                    className={`inline-block rounded-full px-3 py-0.5 text-sm font-medium ${getStatusBadgeClasses(item.status)}`}
+                  >
+                    {item.status === "completed" ? "Completed" : "In Progress"}
+                  </span>
+                )}
+
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  Completion {item.completion.current}/{item.completion.total}
+                  <CircularProgress
+                    current={item.completion.current}
+                    total={item.completion.total}
+                  />
+                </div>
               </div>
-            ) : (
-              <span
-                className={`inline-block rounded-full px-3 py-0.5 text-sm font-medium ${getStatusBadgeClasses(item.status)}`}
-              >
-                {item.status === "completed" ? "Completed" : "In Progress"}
-              </span>
-            )}
-
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              Completion {item.completion.current}/{item.completion.total}
-              <CircularProgress
-                current={item.completion.current}
-                total={item.completion.total}
-              />
             </div>
-          </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 };
