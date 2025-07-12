@@ -6,6 +6,7 @@ import { type GetCGMembersResponse } from "@/types/graphql";
 import { useUser } from "@/stores/useUser";
 import { useCGDetails, useSatellite } from "@/graphql/hooks/connect-group";
 import { toast } from "react-hot-toast";
+import { useState } from "react";
 
 interface CGHeaderProps {
   members: GetCGMembersResponse["user_connect_groupCollection"]["edges"][0]["node"]["connect_group"]["user_connect_groupCollection"]["edges"][0]["node"]["user"][];
@@ -13,8 +14,9 @@ interface CGHeaderProps {
 
 export const CGHeader: React.FC<CGHeaderProps> = ({ members }) => {
   const { user } = useUser();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
-  const { data } = useCGDetails();
+  const { data, isPending } = useCGDetails();
 
   const { data: satellite } = useSatellite(
     data?.connect_groupCollection.edges[0]?.node.satellite_id ?? "",
@@ -26,14 +28,27 @@ export const CGHeader: React.FC<CGHeaderProps> = ({ members }) => {
         <p className="text-sm font-bold">
           Satellite: {satellite?.satelliteCollection.edges[0]?.node.name}
         </p>
-        <img
-          src={
-            data?.connect_groupCollection.edges[0]?.node.image_url ??
-            `https://placehold.co/350x170?text=${data?.connect_groupCollection.edges[0]?.node.name}`
-          }
-          alt="Cover"
-          className="w-full rounded-sm object-cover"
-        />
+        <div className="relative min-h-[240px] w-full">
+          {(!imageLoaded || isPending) && (
+            <div className="absolute inset-0 flex animate-pulse items-center justify-center rounded-sm bg-gray-200">
+              <div className="text-sm text-gray-400">Loading...</div>
+            </div>
+          )}
+          {!isPending && (
+            <img
+              src={
+                data?.connect_groupCollection.edges[0]?.node.image_url ??
+                `https://placehold.co/350x170?text=${data?.connect_groupCollection.edges[0]?.node.name}`
+              }
+              alt="Cover"
+              className={`h-full w-full rounded-sm object-cover transition-opacity duration-300 ${
+                imageLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => setImageLoaded(true)}
+              onError={() => setImageLoaded(true)} // Also show on error to prevent infinite loading
+            />
+          )}
+        </div>
       </div>
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-1">
