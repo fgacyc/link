@@ -91,12 +91,30 @@ export const useUser = create<UserStore>()(
 
           set({ user: mappedUser });
 
-          // Clean up URL
-          const url = new URL(window.location.href);
-          url.searchParams.delete("token");
+          // Clean up URL - safer approach
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("token");
+            window.history.replaceState({}, document.title, url.toString());
+          } catch (urlError) {
+            // Fallback approach if URL construction fails
+            console.warn(
+              "Failed to construct URL, using fallback approach:",
+              urlError,
+            );
+            try {
+              const currentUrl = window.location.href;
+              const urlWithoutToken = currentUrl
+                .replace(/[?&]token=[^&]*/, "")
+                .replace(/\?$/, "");
+              window.history.replaceState({}, document.title, urlWithoutToken);
+            } catch (fallbackError) {
+              console.warn("Fallback URL cleanup also failed:", fallbackError);
+              // If both approaches fail, just continue without URL cleanup
+            }
+          }
 
           set({ isLoading: false });
-          window.history.replaceState({}, document.title, url.toString());
 
           return mappedUser;
         } catch (error) {
