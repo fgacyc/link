@@ -45,9 +45,10 @@ export const useUser = create<UserStore>()(
         set({ isLoading: true });
         try {
           const urlParams = new URLSearchParams(window.location.search);
-          const urlToken = urlParams.get("token");
 
+          const urlToken = urlParams.get("token");
           if (!urlToken) {
+            alert("No Token Found.");
             return;
           }
 
