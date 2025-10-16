@@ -12,7 +12,7 @@ interface CGHeaderProps {
 }
 
 export const CGHeader: React.FC<CGHeaderProps> = ({ members }) => {
-  const { user } = useUser();
+  const { user, token, language } = useUser();
 
   const { data } = useCGDetails();
 
@@ -56,7 +56,9 @@ export const CGHeader: React.FC<CGHeaderProps> = ({ members }) => {
         <Button
           label="Numbers"
           onClick={() => {
-            window.open(`https://miniapp-numbers-new.pages.dev/${user?.cg}`);
+            window.open(
+              `https://miniapp-numbers-new.pages.dev/${user?.cg}?token=${token}&language=${language}`,
+            );
           }}
         />
       </div>
