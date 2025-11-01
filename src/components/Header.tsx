@@ -1,7 +1,8 @@
 import { GoChevronLeft } from "react-icons/go";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 import Dialog from "./Dialog/Dialog";
+import { IoClose } from "react-icons/io5";
 
 interface HeaderNavProps {
   title: string;
@@ -24,6 +25,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 }) => {
   const navigate = useNavigate();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const location = useLocation();
 
   const handleBackClick = () => {
     if (hasUnsavedChanges) {
@@ -49,12 +51,22 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         className={`top-0 z-[998] flex w-full flex-row items-center justify-between px-4 py-6.5 ${white ? "text-white" : ""} ${fixed ? "fixed" : "sticky"}`}
       >
         <div className="h-6 w-6">
-          {showBack && (
+          {showBack && location.pathname !== "/cg" && (
             <GoChevronLeft
               onClick={handleBackClick}
               className="cursor-pointer"
               role="button"
               size={24}
+            />
+          )}
+          {location.pathname === "/cg" && (
+            <IoClose
+              className="cursor-pointer"
+              role="button"
+              size={24}
+              onClick={() =>
+                (window.location.href = "https://back.fgacyc.com/")
+              }
             />
           )}
         </div>

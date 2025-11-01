@@ -13,6 +13,7 @@ interface UserStore {
   user: Auth0ToGraphQLUserMapping | null;
   token: string;
   uid: string;
+  language: string;
   initUser: () => Promise<Auth0ToGraphQLUserMapping | undefined>;
   setUser: (user: Auth0ToGraphQLUserMapping) => void;
   setToken: (token: string) => void;
@@ -41,12 +42,14 @@ export const useUser = create<UserStore>()(
       user: null,
       token: "",
       uid: "",
+      language: "en",
       initUser: async () => {
         set({ isLoading: true });
         try {
           const urlParams = new URLSearchParams(window.location.search);
 
           const urlToken = urlParams.get("token");
+          const urlLanguage = urlParams.get("language");
           if (!urlToken) {
             alert("No Token Found.");
             return;
@@ -62,6 +65,7 @@ export const useUser = create<UserStore>()(
           // Set token and user data
           set({ token: urlToken });
           set({ uid: decodedToken.sub });
+          set({ language: urlLanguage ?? "en" });
 
           // when user is populated, fetch the user details from graphql
           const userDetails = await executeQuery(

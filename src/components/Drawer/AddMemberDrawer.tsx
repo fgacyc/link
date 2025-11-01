@@ -6,6 +6,8 @@ import {
 import Drawer from ".";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
+import { useCGDetails } from "@/graphql/hooks/connect-group";
+import { useUser } from "@/stores/useUser";
 
 interface AddMemberDrawerProps {
   open: boolean;
@@ -14,6 +16,12 @@ interface AddMemberDrawerProps {
 
 export const AddMemberDrawer = ({ open, setOpen }: AddMemberDrawerProps) => {
   const navigate = useNavigate();
+  const { user } = useUser();
+  const { data: cgDetails } = useCGDetails();
+
+  const cgName =
+    cgDetails?.connect_groupCollection.edges[0]?.node.name ?? "our CG";
+  const cgId = user?.cg ?? "";
 
   return (
     <Drawer open={open} setOpen={setOpen} title="Add Member">
@@ -26,12 +34,20 @@ export const AddMemberDrawer = ({ open, setOpen }: AddMemberDrawerProps) => {
           title="Add Shadow User"
           description="Record the attendance of unregistered members or new friends without requiring immediate registration."
         />
-        {/* <ActionItem
-          onClick={() => toast("Invitation Link Copied!")}
+        <ActionItem
+          onClick={() => {
+            const invitationText = `Hey! Welcome to my CG, ${cgName}! 
+Join us by clicking the link below! 
+
+https://invite.fgacyc.com/${cgId}`;
+
+            navigator.clipboard.writeText(invitationText);
+            toast.success("Invitation Link Copied!");
+          }}
           icon={<LinkRounded className="text-dark-neon-green" />}
           title="Copy Invitation Link"
           description="Generate an invitation link to encourage new friends to register and download the app."
-        /> */}
+        />
       </div>
     </Drawer>
   );

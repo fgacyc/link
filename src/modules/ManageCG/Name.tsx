@@ -1,13 +1,19 @@
 import { ActionButton } from "@/components/Button";
 import Input from "@/components/Input";
 import Popup from "@/components/Popup/Popup";
-import { useCGDetails, useEditCG } from "@/graphql/hooks/connect-group";
+import {
+  useCGDetails,
+  useEditCG,
+  usePastoralRole,
+} from "@/graphql/hooks/connect-group";
 import { TitleContext } from "@/providers/TitleContextProvider";
 import { Form, Formik } from "formik";
 import { useContext, useEffect, useState } from "react";
 import { CgSpinner } from "react-icons/cg";
 import { useNavigate } from "react-router";
 import * as Yup from "yup";
+import { useUser } from "@/stores/useUser";
+import { hasElevatedPermissions } from "@/utils";
 
 type EditCGNameForm = {
   name: string;
@@ -24,10 +30,20 @@ const ManageCGName = () => {
   } = useContext(TitleContext);
 
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
-
   const { data, isLoading, isRefetching } = useCGDetails();
-
   const navigate = useNavigate();
+  const { uid } = useUser();
+  const { data: pastoralRoleData } = usePastoralRole(uid);
+
+  const currentName = data?.connect_groupCollection.edges[0]?.node.name ?? "";
+
+  // Get current user's pastoral role weight
+  const roleWeight =
+    pastoralRoleData?.user_connect_groupCollection.edges[0]?.node.pastoral_role
+      ?.weight;
+
+  // Check if user has permission to edit based on role weight
+  const hasPermission = hasElevatedPermissions(roleWeight);
 
   useEffect(() => {
     setRightIcon(null);
@@ -43,7 +59,7 @@ const ManageCGName = () => {
     };
   }, [setRightIcon, setWhite, setTitle, setFixed, setBg, setHasUnsavedChanges]);
 
-  const editCG = useEditCG();
+  const { mutateAsync: editCG, isPending: isEditing } = useEditCG();
 
   return (
     <>
@@ -66,29 +82,42 @@ const ManageCGName = () => {
         <p className="text-gray">Group Name Changed Successfully!</p>
       </Popup>
       <div className="flex h-full w-full flex-col gap-5 px-4">
-        {isLoading || isRefetching ? (
+        {isEditing || isLoading || isRefetching ? (
           <div className="flex flex-col items-center justify-center gap-2">
             <CgSpinner className="animate-spin" color="#41FAD3" size={28} />
             <p className="text-center">Loading...</p>
           </div>
+        ) : !hasPermission ? (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-lg bg-red-50 p-6 text-center">
+            <p className="text-lg font-semibold text-red-700">Access Denied</p>
+            <p className="text-sm text-red-600">
+              You don't have permission to edit the group name. Only Pastors,
+              Team Leaders, Coaches, and Connect Group Leaders can edit this
+              field.
+            </p>
+            <ActionButton
+              extendedPaddingY
+              label="Go Back"
+              onClick={() => navigate(-1)}
+            />
+          </div>
         ) : (
           <Formik<EditCGNameForm>
             initialValues={{
-              name: "",
+              name: currentName,
             }}
             enableReinitialize
             validateOnChange={false}
             onSubmit={(values, action) => {
               action.setSubmitting(true);
 
-              editCG.mutate(
+              editCG(
                 {
                   name: values.name.trim(),
                   id: data?.connect_groupCollection.edges[0]?.node.id ?? "",
                 },
                 {
                   onSuccess: () => {
-                    action.resetForm();
                     setHasUnsavedChanges(false);
                     setSuccessDialogOpen(true);
                   },
@@ -101,7 +130,12 @@ const ManageCGName = () => {
             validationSchema={Yup.object().shape({
               name: Yup.string()
                 .required("Required.")
-                .max(50, "Maximum 50 characters."),
+                .max(50, "Maximum 50 characters.")
+                .test(
+                  "no-formula-injection",
+                  'Cannot start with "=" character.',
+                  (value) => !value?.trim().startsWith("="),
+                ),
             })}
           >
             {({ submitForm, isSubmitting, dirty }) => {

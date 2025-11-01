@@ -74,7 +74,8 @@ const ManageCGDescription = () => {
         ) : (
           <Formik<EditCGDescriptionForm>
             initialValues={{
-              description: "",
+              description:
+                data?.connect_groupCollection.edges[0]?.node.description ?? "",
             }}
             enableReinitialize
             validateOnChange={false}
@@ -88,7 +89,6 @@ const ManageCGDescription = () => {
                 },
                 {
                   onSuccess: () => {
-                    action.resetForm();
                     setHasUnsavedChanges(false);
                     setSuccessDialogOpen(true);
                   },
@@ -101,7 +101,12 @@ const ManageCGDescription = () => {
             validationSchema={Yup.object().shape({
               description: Yup.string()
                 .required("Required.")
-                .max(100, "Maximum 100 characters."),
+                .max(100, "Maximum 100 characters.")
+                .test(
+                  "no-formula-injection",
+                  'Cannot start with "=" character.',
+                  (value) => !value?.trim().startsWith("="),
+                ),
             })}
           >
             {({ submitForm, isSubmitting, dirty }) => {

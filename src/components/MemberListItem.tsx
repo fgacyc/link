@@ -1,5 +1,4 @@
 import { ProfileIcon } from "./ProfileIcon";
-import { Flag } from "@mui/icons-material";
 import { useLatestCGAttendance } from "@/graphql/hooks/attendance";
 import type { CGMemberUser } from "@/types/graphql";
 import { usePastoralRole } from "@/graphql";
@@ -10,13 +9,27 @@ import { Link } from "react-router";
 import { RoleTag } from "./RoleTag";
 
 export const MemberListItem: React.FC<{
-  member: CGMemberUser;
-}> = ({ member }) => {
+  member: CGMemberUser & { weight?: number; isPendingIncoming?: boolean };
+  pendingInvite?: {
+    cg_id: string;
+    status: string;
+    connect_group: {
+      id: string;
+      name: string;
+      satellite: {
+        id: string;
+        name: string;
+      };
+    };
+  };
+}> = ({ member, pendingInvite: _pendingInvite }) => {
   const { user } = useUser();
   const { data } = useLatestCGAttendance(member.id);
   const { data: pastoralRole } = usePastoralRole(member.id);
-  const pastoralRoleId =
-    pastoralRole?.user_connect_groupCollection.edges[0]?.node.pastoral_role.id;
+  const pastoralRoleWeight =
+    member.weight ??
+    pastoralRole?.user_connect_groupCollection.edges[0]?.node.pastoral_role
+      ?.weight;
 
   if (!member) return null;
 
@@ -25,6 +38,9 @@ export const MemberListItem: React.FC<{
 
   // Determine if this is a shadow user
   const isShadowUser = member.id.startsWith("shadow|");
+
+  // Determine if this is an incoming pending request
+  const isIncomingRequest = member.isPendingIncoming === true;
 
   return (
     <Link to={`/cg/profile/${member.id}`} viewTransition>
@@ -40,10 +56,11 @@ export const MemberListItem: React.FC<{
               `https://placehold.co/40x40?text=${member.name?.replaceAll(" ", "+") ?? "User"}`
             }
             size="mini"
+            userId={member.id}
           />
           <div className="flex flex-col">
             <div className="flex flex-row items-center gap-1">
-              <RoleTag pastoralRoleId={pastoralRoleId ?? ""} />
+              <RoleTag pastoralRoleWeight={pastoralRoleWeight} />
               <p className="text-sm font-semibold">
                 {member.name}
                 {member.id === user?.id ? (
@@ -54,16 +71,22 @@ export const MemberListItem: React.FC<{
                 ) : null}
               </p>
             </div>
-            <p className="text-gray text-[10px]">
-              Last attended date:{" "}
-              {attendanceDate
-                ? new Date(attendanceDate).toLocaleDateString("en-GB", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
-                : "N/A"}
-            </p>
+            {isIncomingRequest ? (
+              <span className="text-[8px] font-medium text-[#4D52FF]/70">
+                Incoming Request
+              </span>
+            ) : (
+              <p className="text-gray text-[10px]">
+                Last attended date:{" "}
+                {attendanceDate
+                  ? new Date(attendanceDate).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "N/A"}
+              </p>
+            )}
           </div>
         </div>
         <ActivityIndicator
