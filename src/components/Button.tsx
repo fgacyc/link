@@ -2,7 +2,7 @@ import { CgSpinner } from "react-icons/cg";
 
 export interface ActionButtonProps {
   label: string;
-  onClick: (() => void) | (() => Promise<void>);
+  onClick?: (() => void) | (() => Promise<void>);
   variant?: "primary" | "secondary" | "warning";
   disabled?: boolean;
   rounded?: "small" | "default";
@@ -35,6 +35,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
             ? "text-dark bg-white/95"
             : "bg-white/95 text-[#FF0000]"
       }`}
+      disabled={disabled}
       onClick={onClick}
     >
       {loading ? (

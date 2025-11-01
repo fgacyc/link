@@ -30,6 +30,7 @@ export const MainRoutes = () => {
           </ProtectedRoute>
         }
       >
+        <Route path="bind-account/:id" element={<BindAccount />} />
         <Route path="add-shadow-user" element={<AddShadowUser />} />
         <Route path="manage" element={<ManageCG />} />
         <Route path="manage/name" element={<ManageCGName />} />
@@ -37,7 +38,6 @@ export const MainRoutes = () => {
         <Route path="manage/description" element={<ManageCGDescription />} />
         <Route index element={<Details />} />
         {/* <Route path="example" element={<CGDashboard />} />
-        <Route path="bind-account" element={<BindAccount />} />
         <Route path="remove-group" element={<RemoveGroup />} />
         <Route path="popup" element={<PopupDemo />} />
         <Route path="dialog" element={<DialogDemo />} /> */}

@@ -78,7 +78,6 @@ const ManageCGImage = () => {
         },
         {
           onSuccess: () => {
-            actions.resetForm({ values: { image_url: finalImageUrl } });
             setHasUnsavedChanges(false);
             setSuccessDialogOpen(true);
           },
@@ -152,7 +151,8 @@ const ManageCGImage = () => {
         ) : (
           <Formik<EditCGImageForm>
             initialValues={{
-              image_url: "",
+              image_url:
+                data?.connect_groupCollection.edges[0]?.node.image_url ?? "",
             }}
             enableReinitialize
             validateOnChange={false}

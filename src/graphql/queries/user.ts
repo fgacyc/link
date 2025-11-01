@@ -30,6 +30,23 @@ const GET_SINGLE_PERSON = `
           ic_number
           date_of_birth
           email
+          connect_group_inviteCollection(filter: { status: { eq: "pending" } }) {
+            edges {
+              node {
+                cg_id
+                status
+                created_at
+                connect_group {
+                  id
+                  name
+                  satellite {
+                    id
+                    name
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -80,7 +97,7 @@ const UPDATE_SINGLE_PERSON = `
 // Query Hooks
 export const useSinglePerson = (uid: string) => {
   return useQuery({
-    queryKey: ["singlePerson", uid],
+    queryKey: ["singlePerson", uid, "v4"], // Added version to bust cache
     queryFn: async (): Promise<GraphQLUser | null> => {
       try {
         const data = await executeQuery(

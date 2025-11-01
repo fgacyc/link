@@ -1,5 +1,7 @@
-import { useCGDetails } from "@/graphql";
+import { useCGDetails, usePastoralRole } from "@/graphql";
 import { TitleContext } from "@/providers/TitleContextProvider";
+import { useUser } from "@/stores/useUser";
+import { hasElevatedPermissions } from "@/utils";
 import { ChevronRightSharp } from "@mui/icons-material";
 import { useContext, useEffect } from "react";
 import { CgSpinner } from "react-icons/cg";
@@ -21,6 +23,13 @@ const ManageCG = () => {
   const cgName = data?.connect_groupCollection.edges[0]?.node.name;
   const cgImageUrl = data?.connect_groupCollection.edges[0]?.node.image_url;
 
+  const { user } = useUser();
+  const { data: pastoralRole } = usePastoralRole(user?.id ?? "");
+  const pastoralRoleWeight =
+    pastoralRole?.user_connect_groupCollection.edges[0]?.node.pastoral_role
+      .weight;
+  const hasPermissions = hasElevatedPermissions(pastoralRoleWeight ?? 0);
+
   const ListItem = ({
     label,
     value,
@@ -33,7 +42,11 @@ const ManageCG = () => {
     imageUrl?: string;
   }) => {
     return (
-      <Link to={to} viewTransition>
+      <Link
+        to={to}
+        viewTransition
+        className={!hasPermissions ? "pointer-events-none" : ""}
+      >
         <div
           className={`flex w-full flex-row py-2 ${
             imageUrl ? "items-start" : "items-center"
@@ -54,7 +67,7 @@ const ManageCG = () => {
               {value}
             </p>
           )}
-          <ChevronRightSharp fontSize="inherit" />
+          {hasPermissions && <ChevronRightSharp fontSize="inherit" />}
         </div>
       </Link>
     );

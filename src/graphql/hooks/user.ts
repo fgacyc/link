@@ -26,12 +26,26 @@ export const GET_SINGLE_PERSON = `
         date_of_birth
         email
         metadata
+        connect_group_inviteCollection (filter: { status: { eq: "pending" } }) {
+          edges {
+            node {
+              status
+              created_at
+              connect_group {
+                id
+                name
+                satellite_id
+              }
+            }
+          }
+        }
         user_connect_groupCollection {
           edges {
             node {
               pastoral_role {
                 id
                 name
+                weight
               }
               connect_group {
                 id

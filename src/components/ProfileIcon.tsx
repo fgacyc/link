@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { GoCheckCircleFill } from "react-icons/go";
+import { usePendingInvites } from "@/providers/PendingInvitesProvider";
 
 interface ProfileIconProps {
   imageUrl: string;
   isVerified?: boolean;
-  size?: "mini" | "small" | "medium" | "large";
+  size?: "mini" | "small" | "medium" | "large" | "xlarge";
   alt?: string;
   hideBorder?: boolean;
+  hasPendingInvite?: boolean;
+  userId?: string; // Optional user ID to automatically check for pending invites
 }
 
 const SIZES = {
@@ -26,6 +29,10 @@ const SIZES = {
     container: 80,
     badge: 28,
   },
+  xlarge: {
+    container: 92,
+    badge: 38,
+  },
 };
 
 export const ProfileIcon: React.FC<ProfileIconProps> = ({
@@ -34,8 +41,16 @@ export const ProfileIcon: React.FC<ProfileIconProps> = ({
   size = "medium",
   alt = "Profile picture",
   hideBorder,
+  hasPendingInvite = false,
+  userId,
 }) => {
   const [hasImageError, setHasImageError] = useState(false);
+  const pendingInvitesContext = usePendingInvites();
+
+  // Check if user has pending invite - either from prop or from context
+  const hasPending =
+    hasPendingInvite ||
+    Boolean(userId && pendingInvitesContext?.pendingInvitesMap.has(userId));
 
   const handleImageError = () => {
     setHasImageError(true);
@@ -65,12 +80,13 @@ export const ProfileIcon: React.FC<ProfileIconProps> = ({
           </div>
         </div>
       )}
-      {isVerified && (
-        <GoCheckCircleFill
-          className="absolute -right-0.5 -bottom-0.5 rounded-full border border-white bg-white text-green-500"
-          size={SIZES[size].badge}
-        />
-      )}
+      <GoCheckCircleFill
+        className="absolute -right-0.5 -bottom-0.5 rounded-full border border-white bg-white"
+        style={{
+          color: hasPending ? "#4D52FF" : isVerified ? "#22c55e" : "#9ca3af",
+        }}
+        size={SIZES[size].badge}
+      />
     </div>
   );
 };

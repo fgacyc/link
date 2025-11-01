@@ -1,6 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createShadowUser } from "../server";
-import type { CreateShadowUserResponse } from "@/types/graphql";
+import { bindShadowUser, createShadowUser } from "../server";
+import type {
+  BindShadowUserResponse,
+  CreateShadowUserResponse,
+} from "@/types/graphql";
 
 export const shadowUserQueries = {
   default: [{ scope: "shadow_user" }] as const,
@@ -21,6 +24,22 @@ export const useCreateShadowUser = () => {
     }): Promise<CreateShadowUserResponse> => createShadowUser(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: shadowUserQueries.default });
+    },
+  });
+};
+
+export const useBindShadowUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      shadowUserId: string;
+      targetUserId: string;
+    }): Promise<BindShadowUserResponse> => bindShadowUser(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["connect-group", shadowUserQueries.default],
+      });
     },
   });
 };

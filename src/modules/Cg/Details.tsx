@@ -10,22 +10,28 @@ import { Icon } from "@/components/Icon";
 
 import { MemberEngagementLevelDrawer } from "@/components/Drawer/MemberEngagementLevelDrawer";
 import { AddMemberDrawer } from "@/components/Drawer/AddMemberDrawer";
-import { useCGMembers } from "@/graphql/hooks/connect-group";
+import {
+  useCGMembers,
+  usePastoralRole,
+  usePendingCGInvites,
+} from "@/graphql/hooks/connect-group";
 import { useUser } from "@/stores/useUser";
 import { CgSpinner } from "react-icons/cg";
 import { MemberListItem } from "@/components/MemberListItem";
 import type { CGMemberUser } from "@/types/graphql";
 import { CGHeader } from "./Header";
 import { Link } from "react-router";
+import { hasElevatedPermissions } from "@/utils";
+import { PendingInvitesProvider } from "@/providers/PendingInvitesProvider";
 
-const filters = [
+const createFilters = (pendingUserIds: Set<string>) => [
   {
     label: "All",
     filter: (a: CGMemberUser) => a,
   },
   {
     label: "Pending",
-    filter: (a: CGMemberUser) => a,
+    filter: (a: CGMemberUser) => pendingUserIds.has(a.id),
   },
   // {
   //   label: "New Friend",
@@ -37,18 +43,21 @@ const filters = [
   },
 ];
 
-// Role priority mapping for sorting (lower number = higher priority)
-const rolePriority: Record<string, number> = {
-  rol_fd249a3111bb4dceb57f: 1, // Connect Group Leader
+// Sort members by pastoral role weight
+// Priority: weight 4 first, then ascending (1, 2, 3, 5, 6, 7, 8...)
+const sortByRoleWeight = (a: { weight?: number }, b: { weight?: number }) => {
+  const weightA = a.weight ?? 999;
+  const weightB = b.weight ?? 999;
 
-  rol_930865293a64447e91ea: 2, // Pastor (highest priority if present)
-  rol_482a585b8f764e19a90a: 3, // Team Leader
-  rol_3646e05f277b4e218d00: 4, // Coach
-  rol_77a177d4e38b4fbea80d: 5, // Small Group Leader
-  rol_95fbb421e5054e3d8f2f: 6, // Ordinary Member
-  rol_3de137627bc145d7b411: 7, // New Believer
-  rol_1ecba215831345f48abf: 8, // New Friend
-  pastoral_rol_9a0d9968: 9, // test11 (fallback)
+  // Both have weight 4 - maintain order
+  if (weightA === 4 && weightB === 4) return 0;
+  // A has weight 4 - A comes first
+  if (weightA === 4) return -1;
+  // B has weight 4 - B comes first
+  if (weightB === 4) return 1;
+
+  // Neither has weight 4 - sort ascending
+  return weightA - weightB;
 };
 
 const Details = () => {
@@ -61,16 +70,91 @@ const Details = () => {
   const [searchText, setSearchText] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
   const searchRef = useRef<HTMLInputElement>(null);
-  const { uid } = useUser();
+  const { uid, user } = useUser();
 
   const { data } = useCGMembers(uid);
+
+  // Get current CG ID
+  const currentCgId =
+    data?.user_connect_groupCollection.edges[0]?.node.connect_group.id ?? "";
+
+  // Fetch pending invites TO this CG (incoming invites)
+  const { data: incomingInvitesData } = usePendingCGInvites(currentCgId);
 
   const members = data?.user_connect_groupCollection.edges.flatMap((a) =>
     a.node.connect_group.user_connect_groupCollection.edges.map((b) => ({
       ...b.node.user,
       role: b.node.user_role,
+      weight: b.node.pastoral_role?.weight,
     })),
   );
+
+  // Get incoming pending members (people who want to join this CG)
+  const incomingPendingMembers: Array<
+    CGMemberUser & { weight?: number; isPendingIncoming?: boolean }
+  > =
+    incomingInvitesData?.connect_group_inviteCollection.edges.map((edge) => ({
+      id: edge.node.user.id,
+      name: edge.node.user.name ?? null,
+      avatar_url: (edge.node.user.avatar_url ?? null) as string | null,
+      deleted: edge.node.user.deleted as boolean,
+      role: "Pending",
+      weight: 999, // Low priority for sorting
+      isPendingIncoming: true, // Flag to identify incoming pending members
+    })) ?? [];
+
+  // Create a map of user_id to pending invite from the nested data
+  const pendingInvitesEntries =
+    data?.user_connect_groupCollection.edges.flatMap((a) =>
+      a.node.connect_group.user_connect_groupCollection.edges
+        .filter(
+          (b) => b.node.user.connect_group_inviteCollection.edges.length > 0,
+        )
+        .map((b) => {
+          const invite =
+            b.node.user.connect_group_inviteCollection.edges[0]?.node;
+          if (!invite) return null;
+          return [b.node.user.id, invite] as const;
+        })
+        .filter(
+          (
+            entry,
+          ): entry is [
+            string,
+            {
+              cg_id: string;
+              status: string;
+              created_at: string;
+              connect_group: {
+                id: string;
+                name: string;
+                satellite: { id: string; name: string };
+              };
+            },
+          ] => entry !== null,
+        ),
+    ) ?? [];
+
+  const pendingInvitesMap = new Map(pendingInvitesEntries);
+
+  // Add incoming pending invites to the map
+  incomingInvitesData?.connect_group_inviteCollection.edges.forEach((edge) => {
+    pendingInvitesMap.set(edge.node.user.id, {
+      cg_id: edge.node.cg_id,
+      status: edge.node.status,
+      created_at: edge.node.created_at,
+      connect_group: edge.node.connect_group,
+    });
+  });
+
+  // Create a set of user IDs with pending invites for filtering
+  const pendingUserIds = new Set(pendingInvitesMap.keys());
+
+  // Merge current members with incoming pending members
+  const allMembers = [...(members ?? []), ...incomingPendingMembers];
+
+  // Create filters with pending user IDs
+  const filters = createFilters(pendingUserIds);
 
   useEffect(() => {
     setTitle("CG Details");
@@ -84,8 +168,14 @@ const Details = () => {
     );
   }, [setTitle, setRightIcon, setBg, setWhite, setFixed]);
 
+  const { data: pastoralRole } = usePastoralRole(user?.id ?? "");
+  const pastoralRoleWeight =
+    pastoralRole?.user_connect_groupCollection.edges[0]?.node.pastoral_role
+      .weight;
+  const hasPermissions = hasElevatedPermissions(pastoralRoleWeight ?? 0);
+
   return (
-    <>
+    <PendingInvitesProvider pendingInvitesMap={pendingInvitesMap}>
       <MemberEngagementLevelDrawer
         open={memberEngagementDrawerOpen}
         setOpen={setMemberEngagementDrawerOpen}
@@ -95,12 +185,6 @@ const Details = () => {
         setOpen={setAddMemberDrawerOpen}
       />
 
-      {/* <Drawer
-        open={addMemberDrawerOpen}
-        setOpen={setAddMemberDrawerOpen}
-        title="Add Member"
-        icon={<GroupAddRounded />}
-      /> */}
       <div className="h-full w-full">
         <CGHeader members={members ?? []} />
         <div className="flex w-full flex-col gap-3 px-4 pt-3">
@@ -117,16 +201,18 @@ const Details = () => {
                 }}
               />
             </div>
-            <GroupAddRounded
-              role="button"
-              onClick={() => {
-                setAddMemberDrawerOpen(true);
-              }}
-              sx={{
-                fontSize: 24,
-              }}
-              className="text-dark-neon-green"
-            />
+            {hasPermissions && (
+              <GroupAddRounded
+                role="button"
+                onClick={() => {
+                  setAddMemberDrawerOpen(true);
+                }}
+                sx={{
+                  fontSize: 24,
+                }}
+                className="text-dark-neon-green"
+              />
+            )}
           </div>
           <div className="flex flex-row items-center gap-2 rounded-sm border border-[rgba(0,0,0,0.13)] px-3 py-2.5">
             <input
@@ -161,8 +247,8 @@ const Details = () => {
             ))}
           </div>
           <div className="flex h-full w-full flex-grow flex-col">
-            {members && members?.length > 0 ? (
-              members
+            {allMembers && allMembers?.length > 0 ? (
+              allMembers
                 .filter((a) => {
                   if (!selectedFilter) return a;
                   return filters
@@ -174,14 +260,17 @@ const Details = () => {
                     .toLowerCase()
                     .includes(searchText.toLowerCase()),
                 )
-                .sort((a, b) => {
-                  const priorityA = rolePriority[a.role] ?? 999;
-                  const priorityB = rolePriority[b.role] ?? 999;
-                  return priorityA - priorityB;
+                .sort(sortByRoleWeight)
+                .map((member) => {
+                  const pendingInvite = pendingInvitesMap.get(member.id);
+                  return (
+                    <MemberListItem
+                      key={member.id}
+                      member={member}
+                      pendingInvite={pendingInvite}
+                    />
+                  );
                 })
-                .map((member) => (
-                  <MemberListItem key={member.id} member={member} />
-                ))
             ) : (
               <div className="flex flex-col items-center justify-center gap-2">
                 <CgSpinner className="animate-spin" color="#41FAD3" size={28} />
@@ -191,7 +280,7 @@ const Details = () => {
           </div>
         </div>
       </div>
-    </>
+    </PendingInvitesProvider>
   );
 };
 
