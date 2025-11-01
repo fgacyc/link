@@ -39,7 +39,7 @@ export const AddMemberDrawer = ({ open, setOpen }: AddMemberDrawerProps) => {
             const invitationText = `Hey! Welcome to my CG, ${cgName}! 
 Join us by clicking the link below! 
 
-https://invite.fgacyc.com/${cgId}`;
+https://invite.fgacyc.com/cg/${cgId}`;
 
             navigator.clipboard.writeText(invitationText);
             toast.success("Invitation Link Copied!");
