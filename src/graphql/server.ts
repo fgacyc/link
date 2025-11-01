@@ -21,7 +21,11 @@ import type {
   EditCGResponse,
   GetAllAttendanceResponse,
   GetAllCGResponse,
+  GetCGLeaderResponse,
+  CreateCGInviteResponse,
+  GetPendingCGInvitesResponse,
   RemoveMemberFromCGResponse,
+  BindShadowUserResponse,
 } from "@/types/graphql";
 
 // Helper function to get authenticated headers
@@ -264,6 +268,259 @@ export const removeMemberFromCG = async (data: {
   ) as Promise<RemoveMemberFromCGResponse>;
 };
 
+export const createCGInvite = async (data: {
+  cg_id: string;
+  user_id: string;
+  created_by: string;
+}): Promise<CreateCGInviteResponse> => {
+  // First, try to update existing invite if it exists
+  const updateMutation = gql`
+    mutation UpdateCGInvite(
+      $cg_id: String!
+      $user_id: String!
+      $created_by: String!
+    ) {
+      updateconnect_group_inviteCollection(
+        filter: {
+          cg_id: { eq: $cg_id }
+          user_id: { eq: $user_id }
+          created_by: { eq: $created_by }
+        }
+        set: { status: "pending", updated_at: "now()" }
+      ) {
+        affectedCount
+        records {
+          status
+          user {
+            name
+            id
+          }
+          connect_group {
+            name
+            id
+          }
+        }
+      }
+    }
+  `;
+
+  try {
+    const updateResult = (await executeMutation(
+      updateMutation,
+      data,
+      getAuthHeaders(),
+    )) as {
+      updateconnect_group_inviteCollection: {
+        affectedCount: number;
+        records: Array<{
+          status: string;
+          user: { name?: string; id: string };
+          connect_group: { name: string; id: string };
+        }>;
+      };
+    };
+
+    // If update was successful (affected count > 0), return the result
+    if (updateResult.updateconnect_group_inviteCollection.affectedCount > 0) {
+      return {
+        insertIntoconnect_group_inviteCollection: {
+          records: updateResult.updateconnect_group_inviteCollection.records,
+        },
+      };
+    }
+  } catch {
+    console.log("No existing invite to update, will create new one");
+  }
+
+  // If no existing invite was found, create a new one
+  const insertMutation = gql`
+    mutation CreateCGInvite(
+      $cg_id: String!
+      $user_id: String!
+      $created_by: String!
+    ) {
+      insertIntoconnect_group_inviteCollection(
+        objects: { cg_id: $cg_id, user_id: $user_id, created_by: $created_by }
+      ) {
+        records {
+          status
+          user {
+            name
+            id
+          }
+          connect_group {
+            name
+            id
+          }
+        }
+      }
+    }
+  `;
+
+  return executeMutation(
+    insertMutation,
+    data,
+    getAuthHeaders(),
+  ) as Promise<CreateCGInviteResponse>;
+};
+
+export const cancelCGInvite = async (data: {
+  user_id: string;
+}): Promise<{
+  updateconnect_group_inviteCollection: { affectedCount: number };
+}> => {
+  const mutation = gql`
+    mutation CancelCGInvite($user_id: String!) {
+      updateconnect_group_inviteCollection(
+        filter: { user_id: { eq: $user_id } }
+        set: { status: "cancelled" }
+      ) {
+        affectedCount
+        records {
+          user_id
+          status
+        }
+      }
+    }
+  `;
+
+  return executeMutation(mutation, data, getAuthHeaders()) as Promise<{
+    updateconnect_group_inviteCollection: { affectedCount: number };
+  }>;
+};
+
+export const declineCGInvite = async (data: {
+  user_id: string;
+}): Promise<{
+  updateconnect_group_inviteCollection: { affectedCount: number };
+}> => {
+  const mutation = gql`
+    mutation CancelCGInvite($user_id: String!) {
+      updateconnect_group_inviteCollection(
+        filter: { user_id: { eq: $user_id } }
+        set: { status: "declined" }
+      ) {
+        affectedCount
+        records {
+          user_id
+          status
+        }
+      }
+    }
+  `;
+
+  return executeMutation(mutation, data, getAuthHeaders()) as Promise<{
+    updateconnect_group_inviteCollection: { affectedCount: number };
+  }>;
+};
+
+export const acceptCGInvite = async (data: {
+  user_id: string;
+}): Promise<{
+  updateconnect_group_inviteCollection: { affectedCount: number };
+}> => {
+  const mutation = gql`
+    mutation AcceptCGInvite($user_id: String!) {
+      updateconnect_group_inviteCollection(
+        filter: { user_id: { eq: $user_id } }
+        set: { status: "accepted" }
+      ) {
+        affectedCount
+        records {
+          user_id
+          status
+        }
+      }
+    }
+  `;
+
+  return executeMutation(mutation, data, getAuthHeaders()) as Promise<{
+    updateconnect_group_inviteCollection: { affectedCount: number };
+  }>;
+};
+
+export const updateUserConnectGroup = async (data: {
+  user_id: string;
+  connect_group_id: string;
+}): Promise<{
+  updateuser_connect_groupCollection: {
+    affectedCount: number;
+    records: Array<{
+      connect_group_id: string;
+      connect_group: { name: string };
+    }>;
+  };
+}> => {
+  const mutation = gql`
+    mutation UpdateUserConnectGroup(
+      $user_id: String!
+      $connect_group_id: String!
+    ) {
+      updateuser_connect_groupCollection(
+        filter: { user_id: { eq: $user_id } }
+        set: { connect_group_id: $connect_group_id }
+      ) {
+        affectedCount
+        records {
+          connect_group_id
+          connect_group {
+            name
+          }
+        }
+      }
+    }
+  `;
+
+  return executeMutation(mutation, data, getAuthHeaders()) as Promise<{
+    updateuser_connect_groupCollection: {
+      affectedCount: number;
+      records: Array<{
+        connect_group_id: string;
+        connect_group: { name: string };
+      }>;
+    };
+  }>;
+};
+
+export const getPendingCGInvites = async (
+  cgId: string,
+): Promise<GetPendingCGInvitesResponse> => {
+  const query = gql`
+    query GetPendingCGInvites($cgId: String!) {
+      connect_group_inviteCollection(
+        filter: { cg_id: { eq: $cgId }, status: { eq: "pending" } }
+      ) {
+        edges {
+          node {
+            status
+            created_at
+            connect_group {
+              id
+              name
+              satellite {
+                id
+                name
+              }
+            }
+            user {
+              id
+              name
+              avatar_url
+              deleted
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  return executeQuery(
+    query,
+    { cgId },
+    getAuthHeaders(),
+  ) as Promise<GetPendingCGInvitesResponse>;
+};
+
 // Shadow User operations
 export const createShadowUser = async (data: {
   name?: string;
@@ -297,6 +554,28 @@ export const createShadowUser = async (data: {
     data,
     getAuthHeaders(),
   ) as Promise<CreateShadowUserResponse>;
+};
+
+export const bindShadowUser = async (data: {
+  shadowUserId: string;
+  targetUserId: string;
+}): Promise<BindShadowUserResponse> => {
+  const mutation = gql`
+    mutation BindShadowUser($shadowUserId: String, $targetUserId: String) {
+      merge_shadow_user(
+        shadow_user_id: $shadowUserId
+        target_user_id: $targetUserId
+      ) {
+        id
+      }
+    }
+  `;
+
+  return executeMutation(
+    mutation,
+    data,
+    getAuthHeaders(),
+  ) as Promise<BindShadowUserResponse>;
 };
 
 export const fetchSatellite = async (
@@ -348,6 +627,37 @@ export const getAllCGWithParams = async (
     { key },
     getAuthHeaders(),
   ) as Promise<GetAllCGResponse>;
+};
+
+export const getCGLeader = async (
+  connectGroupId: string,
+): Promise<GetCGLeaderResponse> => {
+  const query = gql`
+    query GetCGLeader($connectGroupId: String!) {
+      user_connect_groupCollection(
+        filter: { connect_group_id: { eq: $connectGroupId } }
+      ) {
+        edges {
+          node {
+            user {
+              id
+              name
+              avatar_url
+            }
+            pastoral_role {
+              weight
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  return executeQuery(
+    query,
+    { connectGroupId },
+    getAuthHeaders(),
+  ) as Promise<GetCGLeaderResponse>;
 };
 
 export const fetchCGDetails = async (
@@ -410,6 +720,8 @@ export const getPastoralRole = async (
           node {
             pastoral_role {
               id
+              name
+              weight
             }
           }
         }
@@ -433,6 +745,7 @@ export const getAllPastoralRole =
             node {
               id
               name
+              weight
             }
           }
         }
@@ -460,11 +773,35 @@ export const getCGMembers = async (
                 edges {
                   node {
                     user_role
+                    pastoral_role {
+                      id
+                      name
+                      weight
+                    }
                     user {
                       name
                       id
                       avatar_url
                       deleted
+                      connect_group_inviteCollection(
+                        filter: { status: { eq: "pending" } }
+                      ) {
+                        edges {
+                          node {
+                            cg_id
+                            status
+                            created_at
+                            connect_group {
+                              id
+                              name
+                              satellite {
+                                id
+                                name
+                              }
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 }

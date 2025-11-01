@@ -4,6 +4,9 @@ import { TitleContext } from "@/providers/TitleContextProvider";
 import { ProfileHeader } from "./Header";
 import { MoreHoriz } from "@mui/icons-material";
 import { EditMemberProfileDrawer } from "@/components/Drawer/EditMemberProfile";
+import { hasElevatedPermissions } from "@/utils";
+import { usePastoralRole } from "@/graphql/hooks";
+import { useUser } from "@/stores/useUser";
 
 type TabType = "progress" | "attendance";
 
@@ -28,18 +31,28 @@ const Profile: React.FC = () => {
   const [editMemberProfileDrawerOpen, setEditMemberProfileDrawerOpen] =
     useState(false);
 
+  const { user } = useUser();
+  const { data: pastoralRole } = usePastoralRole(user?.id ?? "");
+  const pastoralRoleWeight =
+    pastoralRole?.user_connect_groupCollection.edges[0]?.node.pastoral_role
+      .weight;
+  const hasPermissions = hasElevatedPermissions(pastoralRoleWeight ?? 0);
+
   useEffect(() => {
     setTitle("Member Profile");
     setFixed(true);
     setRightIcon(null);
     setBg("#242424");
     setWhite(true);
-    setRightIcon(
-      <MoreHoriz
-        className="text-dark-neon-green"
-        onClick={() => setEditMemberProfileDrawerOpen(true)}
-      />,
-    );
+
+    if (hasPermissions) {
+      setRightIcon(
+        <MoreHoriz
+          className="text-dark-neon-green"
+          onClick={() => setEditMemberProfileDrawerOpen(true)}
+        />,
+      );
+    }
 
     return () => {
       setRightIcon(null);
@@ -51,10 +64,12 @@ const Profile: React.FC = () => {
     setFixed,
     setBg,
     setWhite,
+    hasPermissions,
+    pastoralRoleWeight,
+    user?.id,
   ]);
 
   const [activeTab, setActiveTab] = useState<TabType>("attendance");
-
   return (
     <>
       <EditMemberProfileDrawer

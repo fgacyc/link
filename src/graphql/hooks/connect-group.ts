@@ -15,7 +15,14 @@ import {
   getPastoralRole,
   editCG,
   getAllCGWithParams,
+  getCGLeader,
+  createCGInvite,
+  cancelCGInvite,
+  getPendingCGInvites,
   removeMemberFromCG,
+  declineCGInvite,
+  acceptCGInvite,
+  updateUserConnectGroup,
 } from "../server";
 import { executeQuery } from "../queries";
 import { useUser } from "@/stores/useUser";
@@ -28,6 +35,8 @@ import type {
   GetAllPastoralRoleResponse,
   GetPastoralRoleResponse,
   GetAllCGResponse,
+  GetCGLeaderResponse,
+  GetPendingCGInvitesResponse,
 } from "@/types/graphql";
 
 export const connectGroupQueries = {
@@ -119,7 +128,7 @@ export const useCGDetails = () => {
   const { token, user } = useUser();
 
   return useQuery<FetchCGDetailsResponse>({
-    queryKey: ["cgDetails"],
+    queryKey: [{ ...connectGroupQueries.default[0], type: "cg_details" }],
     queryFn: () => fetchCGDetails(user?.cg ?? ""),
     enabled: !!token && !!user?.cg,
   });
@@ -220,6 +229,26 @@ export const useCGMembersByGroupId = (connectGroupId: string) => {
   });
 };
 
+export const useCGLeader = (connectGroupId: string) => {
+  const { token } = useUser();
+
+  return useQuery<GetCGLeaderResponse>({
+    queryKey: ["cgLeader", connectGroupId],
+    queryFn: () => getCGLeader(connectGroupId),
+    enabled: !!token && !!connectGroupId,
+  });
+};
+
+export const usePendingCGInvites = (cgId: string) => {
+  const { token } = useUser();
+
+  return useQuery<GetPendingCGInvitesResponse>({
+    queryKey: ["pendingCGInvites", cgId],
+    queryFn: () => getPendingCGInvites(cgId),
+    enabled: !!token && !!cgId,
+  });
+};
+
 // Mutation hooks
 export const useEditCG = () => {
   const queryClient = useQueryClient();
@@ -244,6 +273,66 @@ export const useRemoveMemberFromCG = () => {
     mutationFn: (data: { id: string }) => removeMemberFromCG(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: connectGroupQueries.default });
+    },
+  });
+};
+
+export const useCreateCGInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      cg_id: string;
+      user_id: string;
+      created_by: string;
+    }) => createCGInvite(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: connectGroupQueries.default });
+    },
+  });
+};
+
+export const useCancelCGInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { user_id: string }) => cancelCGInvite(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: connectGroupQueries.default });
+      queryClient.invalidateQueries({ queryKey: ["singlePerson"] });
+    },
+  });
+};
+
+export const useDeclineCGInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { user_id: string }) => declineCGInvite(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: connectGroupQueries.default });
+      queryClient.invalidateQueries({ queryKey: ["singlePerson"] });
+    },
+  });
+};
+
+export const useAcceptCGInvite = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { user_id: string; connect_group_id: string }) => {
+      // First, update invite status to "accepted"
+      await acceptCGInvite({ user_id: data.user_id });
+
+      // Then, update the user's connect group
+      return await updateUserConnectGroup({
+        user_id: data.user_id,
+        connect_group_id: data.connect_group_id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: connectGroupQueries.default });
+      queryClient.invalidateQueries({ queryKey: ["singlePerson"] });
     },
   });
 };

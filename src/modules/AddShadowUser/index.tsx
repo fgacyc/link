@@ -50,8 +50,11 @@ export const AddShadowUser = () => {
   const { data: pastoralRoles, isLoading } = useAllPastoralRole();
   const mappedPastoralRoles = pastoralRoles?.pastoral_roleCollection.edges
     // Filter out the CGL
-    .filter((role) => role.node.id !== "rol_fd249a3111bb4dceb57f")
-    .map((role) => ({ label: role.node.name, value: role.node.id }));
+    .filter((role) => role.node.weight >= 5)
+    .map((role) => ({
+      label: role.node.name,
+      value: role.node.id,
+    }));
 
   const addShadowUser = useCreateShadowUser();
   const navigate = useNavigate();
@@ -135,7 +138,9 @@ export const AddShadowUser = () => {
                   }
                 }),
               gender: Yup.string().required("Required."),
-              dob: Yup.date(),
+              dob: Yup.date()
+                .required("Required.")
+                .max(new Date(), "Date of birth cannot be in the future."),
               occupation: Yup.string(),
               remark: Yup.string(),
               role: Yup.string().required("Required."),
@@ -173,7 +178,7 @@ export const AddShadowUser = () => {
                     mappedPastoralRoles ?? [{ label: "Loading...", value: "" }]
                   }
                 />
-                <DateInput label="Date of birth" name="dob" />
+                <DateInput label="Date of birth" name="dob" required />
                 <Input
                   label="Occupation"
                   name="occupation"

@@ -290,11 +290,10 @@ export const TelInput: React.FC<InputProps> = ({
 export const DateInput: React.FC<InputProps> = ({
   label,
   required,
-  placeholder,
   name,
   hint,
 }) => {
-  const { errors, setFieldValue, values } = useFormikContext();
+  const { errors } = useFormikContext();
   const error = errors[name as keyof typeof errors];
   return (
     <div className="flex w-full flex-col gap-0.5">
@@ -370,9 +369,13 @@ interface AutoCompleteOption {
 
 interface AutoCompleteInputProps extends Omit<InputProps, "options"> {
   onSearch: (query: string) => Promise<AutoCompleteOption[]>;
+  onSelect?: (option: AutoCompleteOption) => void;
+  onClear?: () => void; // Called when user manually changes the input
   minQueryLength?: number;
   noResultsText?: string;
   loading?: boolean;
+  disabled?: boolean;
+  disabledOptionId?: string; // ID of option to disable in dropdown
 }
 
 export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
@@ -383,14 +386,19 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
   placeholder,
   hint,
   onSearch,
+  onSelect,
+  onClear,
   minQueryLength = 1,
   noResultsText = "No results found",
+  disabled = false,
+  disabledOptionId,
 }) => {
   const { errors, setFieldValue, values } = useFormikContext();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<AutoCompleteOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [justSelected, setJustSelected] = useState(false);
 
   const loadingText = "Searching...";
 
@@ -402,6 +410,12 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
     const value = e.target.value;
     setQuery(value);
     setFieldValue(name, value);
+    setJustSelected(false); // Reset flag when user manually types
+
+    // Clear selection when user manually changes the input
+    if (onClear) {
+      onClear();
+    }
   };
 
   // Perform the actual search
@@ -426,10 +440,20 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
     setQuery(option.value);
     setShowDropdown(false);
     setResults([]);
+    setJustSelected(true); // Set flag to prevent search from triggering
+
+    // Call onSelect callback if provided
+    if (onSelect) {
+      onSelect(option);
+    }
   };
 
   // Handle input focus
   const handleFocus = () => {
+    // Don't reopen dropdown if user just selected something
+    if (justSelected) {
+      return;
+    }
     if (query.length >= minQueryLength && results.length > 0) {
       setShowDropdown(true);
     }
@@ -444,6 +468,11 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
 
   // Trigger search when query changes (with debouncing)
   useEffect(() => {
+    // Skip search if user just selected an option
+    if (justSelected) {
+      return;
+    }
+
     if (query.length >= minQueryLength) {
       const timeoutId = setTimeout(() => {
         performSearch(query);
@@ -455,7 +484,7 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
       setResults([]);
       setShowDropdown(false);
     }
-  }, [query, minQueryLength]);
+  }, [query, minQueryLength, justSelected]);
 
   // Sync query with field value when field value changes externally
   useEffect(() => {
@@ -481,7 +510,8 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
             onBlur={handleBlur}
             placeholder={placeholder}
             required={required}
-            className={`w-full rounded-md border ${error ? "border-red-600" : "border-gray-300"} bg-white px-3 py-2.5 placeholder:text-[#92969D] focus:outline-none`}
+            disabled={disabled}
+            className={`w-full rounded-md border ${error ? "border-red-600" : "border-gray-300"} ${disabled ? "cursor-not-allowed bg-gray-100 text-gray-500" : "bg-white"} px-3 py-2.5 placeholder:text-[#92969D] focus:outline-none`}
           />
 
           {/* Loading indicator */}
@@ -496,7 +526,7 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
           )}
 
           {/* Dropdown */}
-          {showDropdown && (
+          {showDropdown && !disabled && (
             <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-60 overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg">
               {/* Loading indicator at the top if loading */}
               {isLoading && (
@@ -507,15 +537,34 @@ export const AutoCompleteInput: React.FC<AutoCompleteInputProps> = ({
 
               {/* Results */}
               {results.length > 0
-                ? results.map((option) => (
-                    <div
-                      key={option.id}
-                      className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-50 active:bg-gray-100"
-                      onClick={() => handleOptionSelect(option)}
-                    >
-                      {option.label}
-                    </div>
-                  ))
+                ? results.map((option) => {
+                    const isDisabled = disabledOptionId === option.id;
+                    return (
+                      <div
+                        key={option.id}
+                        className={`px-3 py-2 text-sm ${
+                          isDisabled
+                            ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                            : "cursor-pointer hover:bg-gray-50 active:bg-gray-100"
+                        }`}
+                        onClick={() => {
+                          if (!isDisabled) {
+                            handleOptionSelect(option);
+                          }
+                        }}
+                        title={
+                          isDisabled
+                            ? "Member is already in this CG"
+                            : undefined
+                        }
+                      >
+                        {option.label}
+                        {isDisabled && (
+                          <span className="ml-2 text-xs">(Current CG)</span>
+                        )}
+                      </div>
+                    );
+                  })
                 : !isLoading && (
                     <div className="px-3 py-2 text-sm text-gray-500">
                       {noResultsText}

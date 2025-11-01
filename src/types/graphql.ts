@@ -42,6 +42,23 @@ export interface GraphQLUser {
   user_connect_groupCollection?: UserConnectGroupConnection;
   user_ministryCollection?: UserMinistryConnection;
   user_relationshipCollection?: UserRelationshipConnection;
+  connect_group_inviteCollection?: {
+    edges: Array<{
+      node: {
+        cg_id: string;
+        status: string;
+        created_at: string;
+        connect_group: {
+          id: string;
+          name: string;
+          satellite: {
+            id: string;
+            name: string;
+          };
+        };
+      };
+    }>;
+  };
 }
 
 // Attendance
@@ -976,6 +993,12 @@ export interface CreateShadowUserResponse {
   };
 }
 
+export interface BindShadowUserResponse {
+  bind_shadow_user: {
+    id: string;
+  };
+}
+
 // Satellite Operations
 export interface FetchSatelliteResponse {
   satelliteCollection: {
@@ -1022,6 +1045,67 @@ export interface GetAllCGResponse {
   };
 }
 
+export interface GetCGLeaderResponse {
+  user_connect_groupCollection: {
+    edges: Array<{
+      node: {
+        user: {
+          id: string;
+          name?: string | null;
+          avatar_url?: string | null;
+        };
+        pastoral_role: {
+          weight: number;
+        };
+      };
+    }>;
+  };
+}
+
+export interface CreateCGInviteResponse {
+  insertIntoconnect_group_inviteCollection: {
+    records: Array<{
+      status: string;
+      user: {
+        name?: string | null;
+        id: string;
+      };
+      connect_group: {
+        name: string;
+        id: string;
+      };
+    }>;
+  };
+}
+
+export interface GetPendingCGInvitesResponse {
+  connect_group_inviteCollection: {
+    edges: Array<{
+      node: {
+        id: string;
+        user_id: string;
+        cg_id: string;
+        status: string;
+        created_at: string;
+        connect_group: {
+          id: string;
+          name: string;
+          satellite: {
+            id: string;
+            name: string;
+          };
+        };
+        user: {
+          id: string;
+          name?: string | null;
+          avatar_url?: string | null;
+          deleted: boolean;
+        };
+      };
+    }>;
+  };
+}
+
 export interface FetchCGDetailsResponse {
   connect_groupCollection: {
     edges: Array<{
@@ -1042,6 +1126,8 @@ export interface GetPastoralRoleResponse {
       node: {
         pastoral_role: {
           id: string;
+          name: string;
+          weight: number;
         };
       };
     }>;
@@ -1054,6 +1140,7 @@ export interface GetAllPastoralRoleResponse {
       node: {
         id: string;
         name: string;
+        weight: number;
       };
     }>;
   };
@@ -1084,11 +1171,33 @@ export interface GetCGMembersResponse {
             edges: Array<{
               node: {
                 user_role: string;
+                pastoral_role: {
+                  id: string;
+                  name: string;
+                  weight: number;
+                };
                 user: {
                   name?: string | null;
                   id: string;
                   avatar_url?: string | null;
                   deleted: boolean;
+                  connect_group_inviteCollection: {
+                    edges: Array<{
+                      node: {
+                        cg_id: string;
+                        status: string;
+                        created_at: string;
+                        connect_group: {
+                          id: string;
+                          name: string;
+                          satellite: {
+                            id: string;
+                            name: string;
+                          };
+                        };
+                      };
+                    }>;
+                  };
                 };
               };
             }>;
@@ -1118,12 +1227,29 @@ export interface GetSinglePersonHookResponse {
         email?: string | null;
         created_at?: Datetime | null;
         metadata?: string;
+        connect_group_inviteCollection?: {
+          edges: Array<{
+            node: {
+              status: string;
+              created_at: string;
+              connect_group: {
+                id: string;
+                name: string;
+                satellite: {
+                  id: string;
+                  name: string;
+                };
+              };
+            };
+          }>;
+        };
         user_connect_groupCollection: {
           edges: Array<{
             node: {
               pastoral_role: {
                 id: string;
                 name: string;
+                weight: number;
               };
               connect_group: {
                 id: string;
