@@ -96,8 +96,8 @@ const Details = () => {
     incomingInvitesData?.connect_group_inviteCollection.edges.map((edge) => ({
       id: edge.node.user.id,
       name: edge.node.user.name ?? null,
-      avatar_url: (edge.node.user.avatar_url ?? null) as string | null,
-      deleted: edge.node.user.deleted as boolean,
+      avatar_url: edge.node.user.avatar_url ?? null,
+      deleted: edge.node.user.deleted,
       role: "Pending",
       weight: 999, // Low priority for sorting
       isPendingIncoming: true, // Flag to identify incoming pending members
